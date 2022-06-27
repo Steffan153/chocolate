@@ -5,8 +5,13 @@ lazy val root = project
   .settings(
     name := "Chocolate",
     version := "0.1.0-SNAPSHOT",
-
     scalaVersion := scala3Version,
-
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+    libraryDependencies ++= Seq(
+      "org.scalameta" %% "munit" % "0.7.29" % Test,
+      ("org.typelevel" %% "spire" % "0.17.0").cross(CrossVersion.for3Use2_13)
+    ),
+    scalacOptions ++= Seq(
+      "-encoding",
+      "utf8"
+    )
   )
