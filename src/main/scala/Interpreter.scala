@@ -1,3 +1,5 @@
+package chocolate
+
 import spire.math.Number
 import scala.annotation.nowarn
 

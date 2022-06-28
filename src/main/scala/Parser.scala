@@ -1,3 +1,5 @@
+package chocolate
+
 import scala.collection.{mutable => mut}
 import scala.util.control.Breaks._
 

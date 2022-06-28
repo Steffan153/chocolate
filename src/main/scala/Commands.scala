@@ -1,3 +1,5 @@
+package chocolate
+
 import scala.collection.{mutable => mut}
 import spire.math.Number
 import spire.math.Rational.apply

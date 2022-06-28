@@ -1,3 +1,5 @@
+package chocolate
+
 import scala.collection.mutable
 import scala.annotation.nowarn
 
