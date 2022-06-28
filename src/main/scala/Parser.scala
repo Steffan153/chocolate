@@ -44,7 +44,23 @@ class Parser(private val prog: Iterator[Char]) {
             num.append(next())
         NumberLiteral(num.toString)
       case '#' =>
-        Command("#" + next().toString)
+        next() match {
+          case '#' =>
+            while (nonEmpty && peek != '\n')
+              next()
+            WhiteSpace()
+          case '{' =>
+            var depth = 1
+            while (nonEmpty && depth > 0) {
+              val c = next()
+              if (c == '#' && nonEmpty && next() == '{')
+                depth += 1
+              if (c == '}' && nonEmpty && next() == '#')
+                depth -= 1
+            }
+            WhiteSpace()
+          case c => Command("#" + c.toString)
+        }
       case x =>
         Command(x.toString)
 
