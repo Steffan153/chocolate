@@ -14,7 +14,7 @@ class Parser(private val prog: Iterator[Char]) {
   private def next() =
     if (buf.isEmpty) prog.next else buf.remove(0)
 
-  private def parseAST() =
+  private def parseAST(): AST =
     next() match
       case x if x.isWhitespace => WhiteSpace()
       case '"' =>
@@ -61,6 +61,10 @@ class Parser(private val prog: Iterator[Char]) {
             WhiteSpace()
           case c => Command("#" + c.toString)
         }
+      case '^' =>
+        while (peek.isWhitespace)
+          next()
+        Ref(parseAST())
       case x =>
         Command(x.toString)
 

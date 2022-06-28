@@ -1,6 +1,7 @@
 import scala.collection.{mutable => mut}
 import spire.math.Number
 import spire.math.Rational.apply
+import scala.annotation.nowarn
 
 type Nilad = () => Any
 type Monad = (Any) => Any
@@ -9,8 +10,9 @@ type Triad = (Any, Any, Any) => Any
 type Func = Nilad | Monad | Dyad | Triad
 
 type CSeq = Seq[Any]
-type CAtom = String | Number
+type CAtom = String | Number | Func
 
+@nowarn
 object Commands {
   val elements = mut.Map[String, Commands.Command]()
 
@@ -97,7 +99,9 @@ object Commands {
     case (a: Number, b: Number) => a tmod b
   })
   val exponent = addDyad("^")(vect2 { case (a: Number, b: Number) => a ** b })
-  val negate = addMonad("N")(vect1 { case (a: Number) => -a })
+  val negate = addMonad("N")(vect1 {
+    case (a: Number) => -a
+  })
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
   val dropOne = addMonad("D") { case (a: Seq[Any]) => a.drop(1) }
   val concat = addDyad("C") {
@@ -108,6 +112,13 @@ object Commands {
     case (a: Number, b: String) => a.toString + b
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b
+  }
+  val generator = addDyad("G") {
+    case (a: CSeq, b: Nilad) => LazyList.continually(b()).prependedAll(a)
+    case (a: CSeq, b: Monad) => LazyList.iterate(a.last)(b).prependedAll(a.init)
+    case (a: CSeq, b: Dyad) =>
+      lazy val seq: LazyList[Any] = a.to(LazyList) #::: seq.zip(seq.tail).map(b(_, _))
+      seq
   }
   val prefixes = addMonad("P") {
     case (a: Number) =>
