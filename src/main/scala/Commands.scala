@@ -1,5 +1,6 @@
 import scala.collection.{mutable => mut}
 import spire.math.Number
+import spire.math.Rational.apply
 
 type Nilad = () => Any
 type Monad = (Any) => Any
@@ -92,14 +93,69 @@ object Commands {
     case (a: Number, b: Number) => a / b
     case (a: String, b: String) => a.split(b).toSeq
   })
+  val modulus = addDyad("%")(vect2 {
+    case (a: Number, b: Number) => a tmod b
+  })
   val exponent = addDyad("^")(vect2 { case (a: Number, b: Number) => a ** b })
   val negate = addMonad("N")(vect1 { case (a: Number) => -a })
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
-  val prefixes = addMonad("K") { case (a: String) =>
-    a.scanLeft("") { (a, b) => a + b }.drop(1)
+  val dropOne = addMonad("D") { case (a: Seq[Any]) => a.drop(1) }
+  val concat = addDyad("C") {
+    case (a: CSeq, b: CSeq) => a ++ b
+    case (a: CSeq, b: CAtom) => a :+ b
+    case (a: CAtom, b: CSeq) => a +: b
+    case (a: Number, b: Number) => factorial(a) / (factorial(b) * factorial(a - b))
+    case (a: Number, b: String) => a.toString + b
+    case (a: String, b: Number) => a + b.toString
+    case (a: String, b: String) => a + b
   }
-  val suffixes = addMonad("#K") { case (a: String) =>
-    a.scanRight("") { (a, b) => a + b }.init
+  val prefixes = addMonad("P") {
+    case (a: Number) =>
+      var divisors = Seq[Number]()
+      var i = Number.one
+      while (i <= a / 2) {
+        if (a.tmod(i).isZero) divisors = divisors :+ i
+        i += 1
+      }
+      divisors :+ a
+    case (a: String) => a.scanLeft("")(_ + _).drop(1)
+    case (a: LazyList[Any]) => a.scanLeft(LazyList[Any]()){_ appended _}.drop(1)
+    case (a: CSeq) => a.scanLeft(Seq[Any]()){_ appended _}.drop(1)
+  }
+  val sliceUntil = addDyad(":") {
+    case (a: LazyList[Any], b: Number) => a.take(b.toInt)
+    case (a: CSeq, b: Number) => a.take(b.toInt)
+    case (a: String, b: Number) => a.take(b.toInt)
+  }
+  val suffixes = addMonad("#s") {
+    case (a: String) => a.scanRight("")(_ +: _).init
+  }
+  val fibonacci = addMonad("#f") {
+    case (n: Number) =>
+      var a = Number.zero
+      var b = Number.one
+      var i = Number.zero
+      while (i < n) {
+        val temp = a
+        a = b
+        b = temp + b
+        i += 1
+      }
+      a
+  }
+  val factorial = addMonad("!") {
+    case (a: Number) =>
+      var p = Number.one
+      var i = Number.one
+      while (i <= a) {
+        p *= i
+        i += 1
+      }
+      p
+  }.asInstanceOf[Any => Number]
+  val infiniteNumbers = addNilad("#i") { () =>
+    lazy val l: LazyList[Number] = Number.one #:: l.map(_ + 1)
+    l
   }
 
   class Command(val fn: Seq[Any] => Any, val arity: Int)
