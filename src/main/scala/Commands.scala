@@ -168,6 +168,7 @@ object Commands {
     lazy val l: LazyList[Number] = Number.one #:: l.map(_ + 1)
     l
   }
+  addNilad("c1") { () => Seq(Number.one, Number.one) }
 
   class Command(val fn: Seq[Any] => Any, val arity: Int)
 

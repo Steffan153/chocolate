@@ -61,6 +61,7 @@ class Parser(private val prog: Iterator[Char]) {
             WhiteSpace()
           case c => Command("#" + c.toString)
         }
+      case 'c' => Command("c" + next().toString)
       case '^' =>
         while (peek.isWhitespace)
           next()
