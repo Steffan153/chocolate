@@ -1,8 +1,7 @@
-## sbt project compiled with Scala 3
+# Chocolate
 
-### Usage
+Use the .jar file in the root to run. You need java installed. Run with `java -jar Chocolate-assembly-0.0.1.jar temp.choco`
 
-This is a normal sbt project. You can compile code with `sbt compile`, run it with `sbt run`, and `sbt console` will start a Scala 3 REPL.
+## Building it yourself
 
-For more information on the sbt-dotty plugin, see the
-[scala3-example-project](https://github.com/scala/scala3-example-project/blob/main/README.md).
+You need sbt installed. Run `sbt bloopInstall`, then you can use `sbt "run temp.choco"` to run, or to create a .jar file, `sbt assembly`.
