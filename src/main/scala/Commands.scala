@@ -100,7 +100,7 @@ object Commands {
   val modulus = addDyad("%")(vect2 {
     case (a: Number, b: Number) => a tmod b
   })
-  val exponent = addDyad("^")(vect2 { case (a: Number, b: Number) => a ** b })
+  val exponent = addDyad("e")(vect2 { case (a: Number, b: Number) => a ** b })
   val negate = addMonad("N")(vect1 {
     case (a: Number) => -a
   })
