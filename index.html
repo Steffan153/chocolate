@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="js/lib/scalajs-0.0.1.js"></script>
+    <style>
+      .output {
+        word-break: break-word;
+      }
+    </style>
+  </head>
+  <body>
+    <div><label for="code">Code:</label></div>
+    <textarea id="code"></textarea>
+    <p><button class="run">Run!</button> <button class="gen">Generate Link</button></p>
+    <div class="output"></div>
+
+    <script>
+      if (location.hash) {
+        try {
+          const code = location.hash.substr(1);
+          document.getElementById('code').value = atob(code);
+        } catch (e) {}
+      }
+      document.querySelector(".run").addEventListener("click", () => {
+        document.querySelector(".output").innerText = '';
+        const out = Chocolate.execute(document.querySelector("#code").value, "").slice(-1)[0];
+        const stringify = (x) =>
+          Array.isArray(x)
+            ? "[" + x.map(stringify).join(", ") + "]"
+            : typeof x === "string"
+            ? '"' + x.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '\\"') + '"'
+            : x.toString();
+        if (out.constructor.name.includes('Iterator')) {
+          document.querySelector(".output").innerText += "[";
+          let next, tooMany;
+          let i = 0;
+          while (true) {
+            if (i === 100) {
+              tooMany = true;
+              break;
+            }
+            next = out.next();
+            if (next.done) {
+              break;
+            }
+            document.querySelector(".output").innerText += (i !== 0 ? ", " : "") + stringify(next.value);
+            i++;
+          }
+          document.querySelector(".output").innerText += "]";
+          if (tooMany) {
+            document.querySelector(".output").innerText += " (truncated to 100 items)";
+          }
+          return;
+        }
+        document.querySelector(".output").innerText = stringify(
+          out
+        );
+      });
+      document.querySelector('.gen').addEventListener('click', () => {
+        location.hash = '#' + btoa(document.querySelector('#code').value);
+      });
+    </script>
+  </body>
+</html>
