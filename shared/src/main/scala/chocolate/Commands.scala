@@ -5,10 +5,10 @@ import spire.math.Number
 import spire.math.Rational.apply
 import scala.annotation.nowarn
 
-type Nilad = () => Any
-type Monad = (Any) => Any
-type Dyad = (Any, Any) => Any
-type Triad = (Any, Any, Any) => Any
+type Nilad = () => Ctx ?=> Any
+type Monad = Any => Ctx ?=> Any
+type Dyad = (Any, Any) => Ctx ?=> Any
+type Triad = (Any, Any, Any) => Ctx ?=> Any
 type Func = Nilad | Monad | Dyad | Triad
 
 type CSeq = Seq[Any]
@@ -21,20 +21,20 @@ object Commands {
   def getCommand(name: String) = elements(name)
 
   private def addNilad(name: String)(fn: Nilad): Nilad = {
-    elements += name -> Commands.Command((a: Seq[Any]) => fn(), 0)
+    elements += name -> Commands.Command((a: Seq[Any]) => (ctx: Ctx) ?=> fn()(using ctx), 0)
     fn
   }
   private def addMonad(name: String)(fn: Monad): Monad = {
-    elements += name -> Commands.Command((a: Seq[Any]) => fn(a(0)), 1)
+    elements += name -> Commands.Command((a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0))(using ctx), 1)
     fn
   }
   private def addDyad(name: String)(fn: Dyad): Dyad = {
-    elements += name -> Commands.Command((a: Seq[Any]) => fn(a(0), a(1)), 2)
+    elements += name -> Commands.Command((a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0), a(1))(using ctx), 2)
     fn
   }
   private def addTriad(name: String)(fn: Triad): Triad = {
     elements += name -> Commands.Command(
-      (a: Seq[Any]) => fn(a(0), a(1), a(2)),
+      (a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0), a(1), a(2))(using ctx),
       3
     )
     fn
@@ -110,7 +110,7 @@ object Commands {
     case (a: CSeq, b: CSeq) => a ++ b
     case (a: CSeq, b: CAtom) => a :+ b
     case (a: CAtom, b: CSeq) => a +: b
-    case (a: Number, b: Number) => factorial(a) / (factorial(b) * factorial(a - b))
+    case (a: Number, b: Number) => factorial(a).asInstanceOf[Number] / (factorial(b).asInstanceOf[Number] * factorial(a - b).asInstanceOf[Number])
     case (a: Number, b: String) => a.toString + b
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b
@@ -165,14 +165,16 @@ object Commands {
         i += 1
       }
       p
-  }.asInstanceOf[Any => Number]
+  }
   val infiniteNumbers = addNilad("#i") { () =>
     lazy val l: LazyList[Number] = Number.one #:: l.map(_ + 1)
     l
   }
+
+  addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
 
-  class Command(val fn: Seq[Any] => Any, val arity: Int)
+  class Command(val fn: Seq[Any] => Ctx ?=> Any, val arity: Int)
 
   object Command {
     def unapply(c: Command) = Some(c.fn, c.arity)

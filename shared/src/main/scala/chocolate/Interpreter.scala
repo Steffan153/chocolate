@@ -5,6 +5,7 @@ import scala.annotation.nowarn
 import io.circe._
 import io.circe.parser
 import io.circe.generic.auto._
+import shapeless.Lazy
 
 class CFun(val fn: Func)
 
@@ -16,7 +17,7 @@ class Interpreter(program: Iterator[AST]) {
     case Ref(_)           => 0
     case Command(s)       => Commands.getCommand(s).arity
   }
-  def interpretAST(ast: AST): Any = {
+  def interpretAST(using ctx: Ctx)(ast: AST): Any = {
     ast match {
       case NumberLiteral(n) => Number(n)
       case StringLiteral(s) => s
@@ -39,12 +40,12 @@ class Interpreter(program: Iterator[AST]) {
       case Command(s) => {
         val Commands.Command(fn, arity) = Commands.getCommand(s)
         val args = 1 to arity map { _ => interpretAST(program.next) }
-        fn(args)
+        fn(args)(using ctx)
       }
       case n => n
     }
   }
-  def interpret = {
+  def interpret(using ctx: Ctx) = {
     var res = Seq[Any]()
     while (program.nonEmpty) {
       res = res :+ interpretAST(program.next)
@@ -55,7 +56,7 @@ class Interpreter(program: Iterator[AST]) {
 
 object Interpreter {
   def interpret(program: String, inputs: Seq[String]) = {
-    val ctx = Ctx()
+    given ctx: Ctx = Ctx()
     ctx.inputs = inputs.map { x =>
       if (x.forall(x => x.isDigit || x == '.')) Number(x)
       else if (x.startsWith("[")) {
@@ -68,6 +69,8 @@ object Interpreter {
       }
       else x
     }
+    lazy val temp: LazyList[Any] = ctx.inputs.to(LazyList) #::: temp
+    ctx.inputCycle = temp.iterator
     Interpreter(
       Parser.parse(program).iterator
     ).interpret
