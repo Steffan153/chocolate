@@ -2,9 +2,11 @@ name: Build to .jar file
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - "*"
   pull_request:
-    branches: [ main ]
+    branches:
+      - "*"
 
 jobs:
   generate:
@@ -19,6 +21,7 @@ jobs:
           distribution: 'adopt'
       - name: Generate .jar
         run: |
+          rm Chocolate-assembly-*.jar || true
           sbt assembly
           cd target
           cd $(ls | grep scala-)
