@@ -15,6 +15,8 @@
   <body>
     <div><label for="code">Code:</label></div>
     <textarea id="code"></textarea>
+    <div><label for="inputs">Inputs:</label></div>
+    <textarea id="inputs"></textarea>
     <p><button class="run">Run!</button> <button class="gen">Generate Link</button></p>
     <div class="output"></div>
 
@@ -22,12 +24,14 @@
       if (location.hash) {
         try {
           const code = location.hash.substr(1);
-          document.getElementById('code').value = atob(code);
+          const [c, i] = JSON.parse(atob(code));
+          document.querySelector('#code').value = c;
+          document.querySelector('#inputs').value = i;
         } catch (e) {}
       }
       document.querySelector(".run").addEventListener("click", () => {
         document.querySelector(".output").innerText = '';
-        const out = Chocolate.execute(document.querySelector("#code").value, "").slice(-1)[0];
+        const out = Chocolate.execute(document.querySelector("#code").value, document.querySelector("#inputs").value.split("\n")).slice(-1)[0];
         const stringify = (x) =>
           Array.isArray(x)
             ? "[" + x.map(stringify).join(", ") + "]"
@@ -61,7 +65,7 @@
         );
       });
       document.querySelector('.gen').addEventListener('click', () => {
-        location.hash = '#' + btoa(document.querySelector('#code').value);
+        location.hash = '#' + btoa(JSON.stringify([document.querySelector('#code').value, document.querySelector('#inputs').value]));
       });
     </script>
   </body>
