@@ -19,7 +19,6 @@ jobs:
           distribution: 'adopt'
       - name: Generate .jar
         run: |
-          rm Chocolate-assembly-*
           sbt assembly
           cd target
           cd $(ls | grep scala-)
