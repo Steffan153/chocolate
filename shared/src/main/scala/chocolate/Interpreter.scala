@@ -39,7 +39,10 @@ class Interpreter(program: Iterator[AST]) {
         }
       case Command(s) => {
         val Commands.Command(fn, arity) = Commands.getCommand(s)
-        val args = 1 to arity map { _ => interpretAST(program.next) }
+        val args = 1 to arity map { _ =>
+          if (program.hasNext) interpretAST(program.next)
+          else interpretAST(Command("?"))
+        }
         fn(args)(using ctx)
       }
       case n => n
@@ -62,12 +65,14 @@ object Interpreter {
       else if (x.startsWith("[")) {
         parser.parse(x) match {
           case Right(x) =>
-            lazy val f: Json => Seq[Any] = (x: Json) => x.asArray.get.map { y => y.asNumber.getOrElse { y.asString.getOrElse { f(y) } } }
+            lazy val f: Json => Seq[Any] = (x: Json) =>
+              x.asArray.get.map { y =>
+                y.asNumber.getOrElse { y.asString.getOrElse { f(y) } }
+              }
             f(x)
           case Left(_) => x
         }
-      }
-      else x
+      } else x
     }
     lazy val temp: LazyList[Any] = ctx.inputs.to(LazyList) #::: temp
     ctx.inputCycle = temp.iterator
