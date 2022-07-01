@@ -25,16 +25,25 @@ class Interpreter(program: Iterator[AST]) {
         astArity(a) match {
           case 0 => (() => interpretAST(a))
           case 1 => (
-            (l: Any) => ctx ?=>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l))(using ctx)
+            (l: Any) =>
+              (ctx: Ctx) ?=>
+                Commands
+                  .getCommand(a.asInstanceOf[Command].name)
+                  .fn(Seq(l))(using ctx)
           )
           case 2 => (
-            (l: Any, r: Any) => ctx ?=>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r))(using ctx)
+            (l: Any, r: Any) =>
+              (ctx: Ctx) ?=>
+                Commands
+                  .getCommand(a.asInstanceOf[Command].name)
+                  .fn(Seq(l, r))(using ctx)
           )
           case 3 => (
-            (l: Any, r: Any, o: Any) => ctx ?=>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r, o))(using ctx)
+            (l: Any, r: Any, o: Any) =>
+              (ctx: Ctx) ?=>
+                Commands
+                  .getCommand(a.asInstanceOf[Command].name)
+                  .fn(Seq(l, r, o))(using ctx)
           )
         }
       case Command(s) => {
@@ -62,7 +71,7 @@ object Interpreter {
     given ctx: Ctx = Ctx()
     ctx.inputs = inputs.map { x =>
       if (x.forall(x => x.isDigit || x == '.')) Number(x)
-      else if (x.startsWith("[")) {
+      else if (x.startsWith("[") && x.endsWith("]")) {
         parser.parse(x) match {
           case Right(x) =>
             lazy val f: Json => Seq[Any] = (x: Json) =>
@@ -72,7 +81,13 @@ object Interpreter {
             f(x)
           case Left(_) => x
         }
-      } else x
+      } else if (x.startsWith("\"") && x.endsWith("\""))
+        x.drop(1)
+          .dropRight(1)
+          .replace("\\\"", "\"")
+          .replace("\\n", "\n")
+          .replace("\\\\", "\\")
+      else x
     }
     lazy val temp: LazyList[Any] = ctx.inputs.to(LazyList) #::: temp
     ctx.inputCycle = temp.iterator

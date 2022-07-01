@@ -1993,7 +1993,7 @@ $c_Lchocolate_Interpreter$.prototype.interpret__T__sci_Seq__sci_Seq = (function(
     };
     if ($$x1) {
       return $m_Lspire_math_Number$().apply__T__Lspire_math_Number(x$1)
-    } else if ((($uI(x$1.length) >= 0) && ($as_T(x$1.substring(0, $uI("[".length))) === "["))) {
+    } else if (((($uI(x$1.length) >= 0) && ($as_T(x$1.substring(0, $uI("[".length))) === "[")) && $f_T__endsWith__T__Z(x$1, "]"))) {
       var x33 = $m_Lio_circe_parser_package$().parse__T__s_util_Either(x$1);
       if ((x33 instanceof $c_s_util_Right)) {
         var x$3 = $as_Lio_circe_Json($as_s_util_Right(x33).s_util_Right__f_value);
@@ -2004,6 +2004,13 @@ $c_Lchocolate_Interpreter$.prototype.interpret__T__sci_Seq__sci_Seq = (function(
         return x$1
       };
       throw new $c_s_MatchError(x33)
+    } else if (((($uI(x$1.length) >= 0) && ($as_T(x$1.substring(0, $uI("\"".length))) === "\"")) && $f_T__endsWith__T__Z(x$1, "\""))) {
+      var $$x2 = $m_sc_StringOps$();
+      var x$2 = $m_sc_StringOps$().drop$extension__T__I__T(x$1, 1);
+      var this$11 = $$x2.dropRight$extension__T__I__T(x$2, 1);
+      var this$13 = $as_T(this$11.split("\\\"").join("\""));
+      var this$15 = $as_T(this$13.split("\\n").join("\n"));
+      return $as_T(this$15.split("\\\\").join("\\"))
     } else {
       return x$1
     }

@@ -36,7 +36,7 @@
           Array.isArray(x)
             ? "[" + x.map(stringify).join(", ") + "]"
             : typeof x === "string"
-            ? '"' + x.replace("\\", "\\\\").replace("\n", "\\n").replace('"', '\\"') + '"'
+            ? '"' + x.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"'
             : x.toString();
         if (out.constructor.name.includes('Iterator')) {
           document.querySelector(".output").innerText += "[";
