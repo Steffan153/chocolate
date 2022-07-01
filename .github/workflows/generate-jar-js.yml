@@ -34,9 +34,9 @@ jobs:
     needs: generate-jar
 
     steps:
-      - name: Sleep for a few seconds to make sure everything inits
-        run: sleep 10s
       - uses: actions/checkout@v3
+        with:
+          ref: main
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
