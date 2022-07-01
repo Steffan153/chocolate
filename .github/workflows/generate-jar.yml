@@ -21,12 +21,11 @@ jobs:
           distribution: 'adopt'
       - name: Generate .jar
         run: |
-          rm Chocolate-assembly-*.jar || true
           rm Chocolate.jar || true
           sbt assembly
-          cd target
+          cd jvm/target
           cd $(ls | grep scala-3 | head -n 1)
-          mv $(ls | grep chocolate_3- | head -n 1) ../../Chocolate.jar
+          mv Chocolate.jar ../../..
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Generate .jar file"

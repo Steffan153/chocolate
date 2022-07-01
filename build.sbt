@@ -28,12 +28,14 @@ lazy val chocolate = crossProject(JSPlatform, JVMPlatform)
       "-encoding",
       "utf8",
       "-deprecation"
-    )
+    ),
   )
   .jvmSettings(
-    Compile / mainClass := Some("chocolate.JVMMain")
+    Compile / mainClass := Some("chocolate.JVMMain"),
+    assembly / assemblyJarName := "Chocolate.jar",
+    assembly / mainClass := Some("chocolate.JVMMain"),
   )
   .jsSettings(
     Compile / fastOptJS / artifactPath := baseDirectory.value / "lib" / s"scalajs-0.0.1.js",
-    Compile / fullOptJS / artifactPath := baseDirectory.value / "lib" / s"scalajs-0.0.1.js"
+    Compile / fullOptJS / artifactPath := baseDirectory.value / "lib" / s"scalajs-0.0.1.js",
   )
