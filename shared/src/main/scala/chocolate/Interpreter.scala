@@ -25,16 +25,16 @@ class Interpreter(program: Iterator[AST]) {
         astArity(a) match {
           case 0 => (() => interpretAST(a))
           case 1 => (
-            (l: Any) =>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l))
+            (l: Any) => ctx ?=>
+              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l))(using ctx)
           )
           case 2 => (
-            (l: Any, r: Any) =>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r))
+            (l: Any, r: Any) => ctx ?=>
+              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r))(using ctx)
           )
           case 3 => (
-            (l: Any, r: Any, o: Any) =>
-              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r, o))
+            (l: Any, r: Any, o: Any) => ctx ?=>
+              Commands.getCommand(a.asInstanceOf[Command].name).fn(Seq(l, r, o))(using ctx)
           )
         }
       case Command(s) => {
