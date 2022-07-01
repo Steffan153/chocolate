@@ -1142,7 +1142,7 @@ function $p_Lchocolate_Commands$__vect2__F2__F2($thiz, fn) {
   var res$lzy2 = new $c_sr_LazyRef();
   return $p_Lchocolate_Commands$__res$2__F2__sr_LazyRef__F2($thiz, fn, res$lzy2)
 }
-function $p_Lchocolate_Commands$__seq$lzyINIT1$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$2, a$3, b$3, seq$lzy1$1) {
+function $p_Lchocolate_Commands$__seq$lzyINIT1$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$3, a$3, b$4, seq$lzy1$1) {
   if ((seq$lzy1$1 === null)) {
     throw $ct_jl_NullPointerException__(new $c_jl_NullPointerException())
   };
@@ -1153,20 +1153,20 @@ function $p_Lchocolate_Commands$__seq$lzyINIT1$1__Lchocolate_Ctx__sci_Seq__F2__s
     var factory$1 = new $c_sc_IterableFactory$ToFactory(factory);
     var prefix$1 = $as_sci_LazyList(factory$1.fromSpecific__sc_IterableOnce__O(a$3));
     $m_sci_LazyList$();
-    var l = new $c_sjsr_AnonFunction0(((this$2, evidence$17$2$2, a$3$2, b$3$2, seq$lzy1$1$2) => (() => {
-      var $$x2 = $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$2, evidence$17$2$2, a$3$2, b$3$2, seq$lzy1$1$2);
-      var this$3 = $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$2, evidence$17$2$2, a$3$2, b$3$2, seq$lzy1$1$2);
-      return $$x2.zip__sc_IterableOnce__sci_LazyList(this$3.scala$collection$immutable$LazyList$$state__sci_LazyList$State().tail__sci_LazyList()).map__F1__sci_LazyList(new $c_sjsr_AnonFunction1(((evidence$17$3$2, b$4$2) => ((x$1) => {
+    var l = new $c_sjsr_AnonFunction0(((this$2, evidence$17$3$2, a$3$2, b$4$2, seq$lzy1$1$2) => (() => {
+      var $$x2 = $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$2, evidence$17$3$2, a$3$2, b$4$2, seq$lzy1$1$2);
+      var this$3 = $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$2, evidence$17$3$2, a$3$2, b$4$2, seq$lzy1$1$2);
+      return $$x2.zip__sc_IterableOnce__sci_LazyList(this$3.scala$collection$immutable$LazyList$$state__sci_LazyList$State().tail__sci_LazyList()).map__F1__sci_LazyList(new $c_sjsr_AnonFunction1(((evidence$17$4$2, b$5$2) => ((x$1) => {
         var x$1$1 = $as_T2(x$1);
-        return $as_F1(b$4$2.apply__O__O__O(x$1$1._1__O(), x$1$1._2__O())).apply__O__O(evidence$17$3$2)
-      }))(evidence$17$2$2, b$3$2)))
-    }))($thiz, evidence$17$2, a$3, b$3, seq$lzy1$1));
+        return $as_F1(b$5$2.apply__O__O__O(x$1$1._1__O(), x$1$1._2__O())).apply__O__O(evidence$17$4$2)
+      }))(evidence$17$3$2, b$4$2)))
+    }))($thiz, evidence$17$3, a$3, b$4, seq$lzy1$1));
     var $$x1 = seq$lzy1$1.initialize__O__O(prefix$1.lazyAppendedAll__F0__sci_LazyList(l))
   };
   return $as_sci_LazyList($$x1)
 }
-function $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$5, a$5, b$6, seq$lzy1$3) {
-  return $as_sci_LazyList((seq$lzy1$3.sr_LazyRef__f__initialized ? seq$lzy1$3.sr_LazyRef__f__value : $p_Lchocolate_Commands$__seq$lzyINIT1$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$5, a$5, b$6, seq$lzy1$3)))
+function $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$6, a$5, b$7, seq$lzy1$3) {
+  return $as_sci_LazyList((seq$lzy1$3.sr_LazyRef__f__initialized ? seq$lzy1$3.sr_LazyRef__f__value : $p_Lchocolate_Commands$__seq$lzyINIT1$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList($thiz, evidence$17$6, a$5, b$7, seq$lzy1$3)))
 }
 function $p_Lchocolate_Commands$__l$lzyINIT1$1__sr_LazyRef__sci_LazyList($thiz, l$lzy1$1) {
   if ((l$lzy1$1 === null)) {
@@ -1176,9 +1176,9 @@ function $p_Lchocolate_Commands$__l$lzyINIT1$1__sr_LazyRef__sci_LazyList($thiz, 
     var $$x1 = l$lzy1$1.sr_LazyRef__f__value
   } else {
     $m_sci_LazyList$();
-    var l = new $c_sjsr_AnonFunction0(((this$1, l$lzy1$1$2) => (() => $p_Lchocolate_Commands$__l$1__sr_LazyRef__sci_LazyList(this$1, l$lzy1$1$2).map__F1__sci_LazyList(new $c_sjsr_AnonFunction1(((_$25) => {
-      var _$25$1 = $as_Lspire_math_Number(_$25);
-      return _$25$1.$plus__Lspire_math_Number__Lspire_math_Number($m_Lspire_math_Number$().apply__I__Lspire_math_Number(1))
+    var l = new $c_sjsr_AnonFunction0(((this$1, l$lzy1$1$2) => (() => $p_Lchocolate_Commands$__l$1__sr_LazyRef__sci_LazyList(this$1, l$lzy1$1$2).map__F1__sci_LazyList(new $c_sjsr_AnonFunction1(((_$26) => {
+      var _$26$1 = $as_Lspire_math_Number(_$26);
+      return _$26$1.$plus__Lspire_math_Number__Lspire_math_Number($m_Lspire_math_Number$().apply__I__Lspire_math_Number(1))
     })))))($thiz, l$lzy1$1));
     var $$x1 = l$lzy1$1.initialize__O__O($m_sci_LazyList$Deferrer$().$hash$colon$colon$extension__F0__F0__sci_LazyList(l, new $c_sjsr_AnonFunction0((() => $m_Lspire_math_Number$().Lspire_math_Number$__f_one))))
   };
@@ -1485,12 +1485,12 @@ function $c_Lchocolate_Commands$() {
       };
       if ($is_F1(x165)) {
         var b$3$3 = $as_F1(x165);
-        return $m_s_package$().s_package$__f_LazyList.iterate__F0__F1__sci_LazyList(new $c_sjsr_AnonFunction0(((a$3$2) => (() => a$3$2.last__O()))(x167)), b$3$3).prependedAll__sc_IterableOnce__sci_LazyList($as_sc_IterableOnce(x167.init__O()))
+        return $m_s_package$().s_package$__f_LazyList.iterate__F0__F1__sci_LazyList(new $c_sjsr_AnonFunction0(((a$3$2) => (() => a$3$2.last__O()))(x167)), new $c_sjsr_AnonFunction1(((evidence$17$3, b$4$3) => ((_$15) => $as_F1(b$4$3.apply__O__O(_$15)).apply__O__O(evidence$17$3)))(evidence$17$1, b$3$3))).prependedAll__sc_IterableOnce__sci_LazyList($as_sc_IterableOnce(x167.init__O()))
       };
       if ($is_F2(x165)) {
-        var b$4$3 = $as_F2(x165);
+        var b$5$2 = $as_F2(x165);
         var seq$lzy1 = new $c_sr_LazyRef();
-        return $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$29, evidence$17$1, x167, b$4$3, seq$lzy1)
+        return $p_Lchocolate_Commands$__seq$1__Lchocolate_Ctx__sci_Seq__F2__sr_LazyRef__sci_LazyList(this$29, evidence$17$1, x167, b$5$2, seq$lzy1)
       }
     };
     throw new $c_s_MatchError(x155)
@@ -1521,10 +1521,10 @@ function $c_Lchocolate_Commands$() {
     if (((typeof x$1$2$11) === "string")) {
       var a$2$4 = $as_T(x$1$2$11);
       var this$37 = $m_s_Predef$().wrapString__T__sci_WrappedString(a$2$4);
-      var op = new $c_sjsr_AnonFunction2(((_$17, _$18) => {
-        var _$17$1 = $as_T(_$17);
-        var _$18$1 = $uC(_$18);
-        return (("" + _$17$1) + $bC(_$18$1))
+      var op = new $c_sjsr_AnonFunction2(((_$18, _$19) => {
+        var _$18$1 = $as_T(_$18);
+        var _$19$1 = $uC(_$19);
+        return (("" + _$18$1) + $bC(_$19$1))
       }));
       return $as_sci_Seq($as_sc_IndexedSeqOps($f_sc_IterableOps__scanLeft__O__F2__O(this$37, "", op)).drop__I__O(1))
     };
@@ -1532,16 +1532,16 @@ function $c_Lchocolate_Commands$() {
       var a$3$3 = $as_sci_LazyList(x$1$2$11);
       var this$38 = $m_s_package$().s_package$__f_LazyList;
       var elems = $m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([]));
-      return a$3$3.scanLeft__O__F2__sci_LazyList(this$38.from__sc_IterableOnce__sci_LazyList(elems), new $c_sjsr_AnonFunction2(((_$19, _$20) => {
-        var _$19$1 = $as_sci_LazyList(_$19);
-        return _$19$1.appended__O__sci_LazyList(_$20)
+      return a$3$3.scanLeft__O__F2__sci_LazyList(this$38.from__sc_IterableOnce__sci_LazyList(elems), new $c_sjsr_AnonFunction2(((_$20, _$21) => {
+        var _$20$1 = $as_sci_LazyList(_$20);
+        return _$20$1.appended__O__sci_LazyList(_$21)
       }))).drop__I__sci_LazyList(1)
     };
     if ($is_sci_Seq(x$1$2$11)) {
       var a$4$2 = $as_sci_Seq(x$1$2$11);
-      return $as_sci_Seq($as_sc_IterableOps(a$4$2.scanLeft__O__F2__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([]))), new $c_sjsr_AnonFunction2(((_$21, _$22) => {
-        var _$21$1 = $as_sci_Seq(_$21);
-        return $as_sci_Seq(_$21$1.appended__O__O(_$22))
+      return $as_sci_Seq($as_sc_IterableOps(a$4$2.scanLeft__O__F2__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([]))), new $c_sjsr_AnonFunction2(((_$22, _$23) => {
+        var _$22$1 = $as_sci_Seq(_$22);
+        return $as_sci_Seq(_$22$1.appended__O__O(_$23))
       })))).drop__I__O(1))
     };
     throw new $c_s_MatchError(x$1$2$11)
@@ -1579,10 +1579,10 @@ function $c_Lchocolate_Commands$() {
     if (((typeof x$1$2$13) === "string")) {
       var a$14 = $as_T(x$1$2$13);
       var this$46 = $m_s_Predef$().wrapString__T__sci_WrappedString(a$14);
-      var op$1 = new $c_sjsr_AnonFunction2(((_$23, _$24) => {
-        var _$23$1 = $uC(_$23);
-        var _$24$1 = $as_T(_$24);
-        return $m_sc_StringOps$().prepended$extension__T__C__T(_$24$1, _$23$1)
+      var op$1 = new $c_sjsr_AnonFunction2(((_$24, _$25) => {
+        var _$24$1 = $uC(_$24);
+        var _$25$1 = $as_T(_$25);
+        return $m_sc_StringOps$().prepended$extension__T__C__T(_$25$1, _$24$1)
       }));
       return $as_sci_IndexedSeq($as_sc_IterableOps($f_sc_IterableOps__scanRight__O__F2__O(this$46, "", op$1)).init__O())
     };
@@ -1809,27 +1809,30 @@ $c_Lchocolate_Interpreter.prototype.interpretAST__Lchocolate_Ctx__Lchocolate_AST
         break
       }
       case 1: {
-        return new $c_sjsr_AnonFunction1(((ctx$3, a$3) => ((l) => {
+        return new $c_sjsr_AnonFunction1(((a$3) => ((l) => new $c_sjsr_AnonFunction1(((a$2$2, l$2) => ((ctx$1) => {
+          var ctx$3 = $as_Lchocolate_Ctx(ctx$1);
           var this$5 = $m_Lchocolate_Commands$();
-          var name = $as_Lchocolate_Command(a$3).Lchocolate_Command__f_name;
-          return $as_F1($as_Lchocolate_Commands$Command(this$5.Lchocolate_Commands$__f_elements.apply__O__O(name)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l]))))).apply__O__O(ctx$3)
-        }))(ctx, x26));
+          var name = $as_Lchocolate_Command(a$2$2).Lchocolate_Command__f_name;
+          return $as_F1($as_Lchocolate_Commands$Command(this$5.Lchocolate_Commands$__f_elements.apply__O__O(name)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l$2]))))).apply__O__O(ctx$3)
+        }))(a$3, l))))(x26));
         break
       }
       case 2: {
-        return new $c_sjsr_AnonFunction2(((ctx$4, a$4) => ((l$2, r) => {
+        return new $c_sjsr_AnonFunction2(((a$4) => ((l$2$1, r) => new $c_sjsr_AnonFunction1(((a$4$2, l$2$2, r$2) => ((ctx$4) => {
+          var ctx$5 = $as_Lchocolate_Ctx(ctx$4);
           var this$6 = $m_Lchocolate_Commands$();
-          var name$1 = $as_Lchocolate_Command(a$4).Lchocolate_Command__f_name;
-          return $as_F1($as_Lchocolate_Commands$Command(this$6.Lchocolate_Commands$__f_elements.apply__O__O(name$1)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l$2, r]))))).apply__O__O(ctx$4)
-        }))(ctx, x26));
+          var name$1 = $as_Lchocolate_Command(a$4$2).Lchocolate_Command__f_name;
+          return $as_F1($as_Lchocolate_Commands$Command(this$6.Lchocolate_Commands$__f_elements.apply__O__O(name$1)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l$2$2, r$2]))))).apply__O__O(ctx$5)
+        }))(a$4, l$2$1, r))))(x26));
         break
       }
       case 3: {
-        return new $c_sjsr_AnonFunction3(((ctx$5, a$5) => ((l$3, r$2, o) => {
+        return new $c_sjsr_AnonFunction3(((a$5) => ((l$3, r$2$1, o) => new $c_sjsr_AnonFunction1(((a$6$2, l$2$3, r$2$2, o$2) => ((ctx$6) => {
+          var ctx$7 = $as_Lchocolate_Ctx(ctx$6);
           var this$7 = $m_Lchocolate_Commands$();
-          var name$2 = $as_Lchocolate_Command(a$5).Lchocolate_Command__f_name;
-          return $as_F1($as_Lchocolate_Commands$Command(this$7.Lchocolate_Commands$__f_elements.apply__O__O(name$2)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l$3, r$2, o]))))).apply__O__O(ctx$5)
-        }))(ctx, x26));
+          var name$2 = $as_Lchocolate_Command(a$6$2).Lchocolate_Command__f_name;
+          return $as_F1($as_Lchocolate_Commands$Command(this$7.Lchocolate_Commands$__f_elements.apply__O__O(name$2)).Lchocolate_Commands$Command__f_fn.apply__O__O($m_s_package$().s_package$__f_Seq.apply__sci_Seq__sc_SeqOps($m_sr_ScalaRunTime$().genericWrapArray__O__sci_ArraySeq(new $ac_O([l$2$3, r$2$2, o$2]))))).apply__O__O(ctx$7)
+        }))(a$5, l$3, r$2$1, o))))(x26));
         break
       }
       default: {
@@ -1913,7 +1916,7 @@ function $p_Lchocolate_Interpreter$__ctx$lzyINIT1$1__sr_LazyRef__Lchocolate_Ctx(
   };
   return $as_Lchocolate_Ctx((ctx$lzy1$1.sr_LazyRef__f__initialized ? ctx$lzy1$1.sr_LazyRef__f__value : ctx$lzy1$1.initialize__O__O(new $c_Lchocolate_Ctx())))
 }
-function $p_Lchocolate_Interpreter$__ctx$7__sr_LazyRef__Lchocolate_Ctx($thiz, ctx$lzy1$2) {
+function $p_Lchocolate_Interpreter$__ctx$4__sr_LazyRef__Lchocolate_Ctx($thiz, ctx$lzy1$2) {
   return $as_Lchocolate_Ctx((ctx$lzy1$2.sr_LazyRef__f__initialized ? ctx$lzy1$2.sr_LazyRef__f__value : $p_Lchocolate_Interpreter$__ctx$lzyINIT1$1__sr_LazyRef__Lchocolate_Ctx($thiz, ctx$lzy1$2)))
 }
 function $p_Lchocolate_Interpreter$__f$lzyINIT1$1__sr_LazyRef__F1($thiz, f$lzy1$1) {
@@ -1944,7 +1947,7 @@ function $p_Lchocolate_Interpreter$__temp$lzyINIT1$1__sr_LazyRef__sr_LazyRef__sc
   if (temp$lzy1$1.sr_LazyRef__f__initialized) {
     var $$x1 = temp$lzy1$1.sr_LazyRef__f__value
   } else {
-    var this$2 = $p_Lchocolate_Interpreter$__ctx$7__sr_LazyRef__Lchocolate_Ctx($thiz, ctx$lzy1$3).Lchocolate_Ctx__f_inputs;
+    var this$2 = $p_Lchocolate_Interpreter$__ctx$4__sr_LazyRef__Lchocolate_Ctx($thiz, ctx$lzy1$3).Lchocolate_Ctx__f_inputs;
     var factory = $m_s_package$().s_package$__f_LazyList;
     var factory$1 = new $c_sc_IterableFactory$ToFactory(factory);
     var prefix$1 = $as_sci_LazyList(factory$1.fromSpecific__sc_IterableOnce__O(this$2));
@@ -1971,7 +1974,7 @@ $h_Lchocolate_Interpreter$.prototype = $c_Lchocolate_Interpreter$.prototype;
 $c_Lchocolate_Interpreter$.prototype.interpret__T__sci_Seq__sci_Seq = (function(program, inputs) {
   var ctx$lzy1 = new $c_sr_LazyRef();
   var temp$lzy1 = new $c_sr_LazyRef();
-  $p_Lchocolate_Interpreter$__ctx$7__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1).Lchocolate_Ctx__f_inputs = $as_sci_Seq(inputs.map__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x) => {
+  $p_Lchocolate_Interpreter$__ctx$4__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1).Lchocolate_Ctx__f_inputs = $as_sci_Seq(inputs.map__F1__O(new $c_sjsr_AnonFunction1(((this$1) => ((x) => {
     var x$1 = $as_T(x);
     _return: {
       var i = 0;
@@ -2005,8 +2008,8 @@ $c_Lchocolate_Interpreter$.prototype.interpret__T__sci_Seq__sci_Seq = (function(
       return x$1
     }
   }))(this))));
-  $p_Lchocolate_Interpreter$__ctx$7__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1).Lchocolate_Ctx__f_inputCycle = $p_Lchocolate_Interpreter$__temp$1__sr_LazyRef__sr_LazyRef__sci_LazyList(this, ctx$lzy1, temp$lzy1).iterator__sc_Iterator();
-  return new $c_Lchocolate_Interpreter($m_Lchocolate_Parser$().parse__T__sci_List(program).iterator__sc_Iterator()).interpret__Lchocolate_Ctx__sci_Seq($p_Lchocolate_Interpreter$__ctx$7__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1))
+  $p_Lchocolate_Interpreter$__ctx$4__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1).Lchocolate_Ctx__f_inputCycle = $p_Lchocolate_Interpreter$__temp$1__sr_LazyRef__sr_LazyRef__sci_LazyList(this, ctx$lzy1, temp$lzy1).iterator__sc_Iterator();
+  return new $c_Lchocolate_Interpreter($m_Lchocolate_Parser$().parse__T__sci_List(program).iterator__sc_Iterator()).interpret__Lchocolate_Ctx__sci_Seq($p_Lchocolate_Interpreter$__ctx$4__sr_LazyRef__Lchocolate_Ctx(this, ctx$lzy1))
 });
 var $d_Lchocolate_Interpreter$ = new $TypeData().initClass({
   Lchocolate_Interpreter$: 0
