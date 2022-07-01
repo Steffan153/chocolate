@@ -22,11 +22,11 @@ jobs:
       - name: Generate .jar
         run: |
           rm Chocolate-assembly-*.jar || true
-          rm chocolate_3-*.jar || true
+          rm Chocolate.jar || true
           sbt assembly
           cd target
           cd $(ls | grep scala-)
-          mv $(ls | grep chocolate_3-) ../..
+          mv $(ls | grep chocolate_3-) ../../Chocolate.jar
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Generate .jar file"
