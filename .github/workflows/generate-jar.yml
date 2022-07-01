@@ -25,7 +25,7 @@ jobs:
           rm Chocolate.jar || true
           sbt assembly
           cd target
-          cd $(ls | grep scala- | head -n 1)
+          cd $(ls | grep scala-3 | head -n 1)
           mv $(ls | grep chocolate_3- | head -n 1) ../../Chocolate.jar
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
