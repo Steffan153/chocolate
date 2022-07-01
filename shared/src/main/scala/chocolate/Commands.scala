@@ -114,7 +114,10 @@ object Commands {
     -a
   })
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
-  val dropOne = addMonad("D") { case (a: Seq[Any]) => a.drop(1) }
+  val dropOne = addMonad("D") {
+    case (a: Seq[Any]) => a.drop(1)
+    case (a: String) => a.drop(1)
+  }
   val concat = addDyad("C") {
     case (a: CSeq, b: CSeq)  => a ++ b
     case (a: CSeq, b: CAtom) => a :+ b
