@@ -31,7 +31,7 @@
       }
       document.querySelector(".run").addEventListener("click", () => {
         document.querySelector(".output").innerText = '';
-        const out = Chocolate.execute(document.querySelector("#code").value, document.querySelector("#inputs").value.split("\n")).slice(-1)[0];
+        const out = Chocolate.execute(document.querySelector("#code").value, document.querySelector("#inputs").value.split("\n").filter(Boolean)).slice(-1)[0];
         const stringify = (x) =>
           Array.isArray(x)
             ? "[" + x.map(stringify).join(", ") + "]"
