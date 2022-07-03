@@ -110,8 +110,9 @@ object Commands {
     a tmod b
   })
   val exponent = addDyad("e")(vect2 { case (a: Number, b: Number) => a ** b })
-  val negate = addMonad("N")(vect1 { case (a: Number) =>
-    -a
+  val negate = addMonad("N")(vect1 {
+    case (a: Number) => -a
+    case (a: String) => a.map { x => if (x.isUpper) x.toLower else x.toUpper }
   })
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
   val dropOne = addMonad("D") {
