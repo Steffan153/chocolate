@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="js/lib/scalajs-0.0.1.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/loader.min.js"></script>
     <link
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
@@ -29,6 +30,7 @@
       .container {
         width: calc(min(95vw, 600px));
         margin-top: 30px;
+        margin-bottom: 30px;
       }
       button {
         font-family: inherit;
@@ -61,38 +63,75 @@
         margin-top: 15px;
         display: inline-block;
       }
+
+      .copy {
+        margin-top: 15px;
+      }
+
+      #code, #inputs {
+        width: 100%;
+        height: 300px;
+        border: 1px solid #ccc;
+        margin-top: 5px;
+      }
+
+      #inputs {
+        height: 150px;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <p><button class="run">Run!</button> <button class="gen">Generate Link</button> <button class="cgcc">Generate CGCC Submission</button></p>
       <div><label for="code">Code:</label></div>
-      <textarea id="code" rows="10"></textarea>
+      <div id="code"></div>
       <div><label for="inputs">Inputs:</label></div>
-      <textarea id="inputs" rows="5"></textarea>
+      <div id="inputs"></div>
       <div class="output"></div>
       <div class="too-many"></div>
       <button class="copy" style="display: none">Copy to Clipboard</button>
     </div>
 
+		<script>
+      let codeEditor, inputEditor;
+			require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' } });
+			require(['vs/editor/editor.main'], function () {
+				codeEditor = monaco.editor.create(document.querySelector('#code'), {
+					language: 'plaintext',
+          lineNumbers: "off",
+          minimap: {
+            enabled: false
+          },
+          folding: false,
+				});
+				inputEditor = monaco.editor.create(document.querySelector('#inputs'), {
+					language: 'plaintext',
+          lineNumbers: "off",
+          minimap: {
+            enabled: false
+          },
+          folding: false,
+				});
+        if (location.hash) {
+          try {
+            const code = location.hash.substr(1);
+            const [c, i] = JSON.parse(atob(code));
+            codeEditor.setValue(c);
+            inputEditor.setValue(i);
+          } catch (e) {}
+        }
+			});
+		</script>
     <script>
       const $ = x => document.querySelector(x);
       const $$ = x => document.querySelectorAll(x);
-      if (location.hash) {
-        try {
-          const code = location.hash.substr(1);
-          const [c, i] = JSON.parse(atob(code));
-          $("#code").value = c;
-          $("#inputs").value = i;
-        } catch (e) {}
-      }
       $(".run").addEventListener("click", () => {
         $(".output").innerText = "";
         $(".too-many").innerText = "";
         $('.copy').style.display = '';
         const out = Chocolate.execute(
-          $("#code").value,
-          $("#inputs").value.split("\n").filter(Boolean)
+          codeEditor.getValue(),
+          inputEditor.getValue().split("\n").filter(Boolean)
         ).slice(-1)[0];
         const stringify = (x) =>
           Array.isArray(x)
@@ -129,15 +168,16 @@
       });
       $(".gen").addEventListener("click", () => {
         $('.copy').style.display = '';
+        $('.too-many').innerText = '';
         location.hash =
           "#" +
           btoa(
             JSON.stringify([
-              $("#code").value,
-              $("#inputs").value,
+              codeEditor.getValue(),
+              inputEditor.getValue(),
             ])
           );
-        $('.output').innerText = location.protocol + '//' + location.hostname + '/' + location.hash;
+        $('.output').innerText = location.protocol + '//' + location.host + '/' + location.hash;
       });
       function selectElementText(el) {
         var doc = document, sel, range;
@@ -156,10 +196,11 @@
       $('.cgcc').addEventListener('click', () => {
         $('.gen').click();
         $('.copy').style.display = '';
-        $('.output').innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${$('#code').value.length} bytes
+        $('.too-many').innerText = ''
+        $('.output').innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${codeEditor.getValue().length} bytes
 
 \`\`\`
-${$('#code').value}
+${codeEditor.getValue()}
 \`\`\`
 
 [Try it online!](${$('.output').innerText})`;
