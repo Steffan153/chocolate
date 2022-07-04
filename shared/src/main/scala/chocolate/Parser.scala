@@ -61,15 +61,15 @@ class Parser(private val prog: Iterator[Char]) {
                 depth -= 1
             }
             WhiteSpace()
-          case c => Command("#" + c.toString)
+          case c => Oper("#" + c.toString)
         }
-      case 'c' => Command("c" + next().toString)
+      case 'c' => Oper("c" + next().toString)
       case '^' =>
         while (peek.isWhitespace)
           next()
         Ref(parseAST())
       case x =>
-        Command(x.toString)
+        Oper(x.toString)
 
   def parse =
     var asts = List[AST]()

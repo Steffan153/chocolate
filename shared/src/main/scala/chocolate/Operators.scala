@@ -15,37 +15,25 @@ type CSeq = Seq[Any]
 type CAtom = String | Number | Func
 
 @nowarn
-object Commands {
-  val elements = mut.Map[String, Commands.Command]()
+object Operators {
+  val elements = mut.Map[String, Operator]()
 
-  def getCommand(name: String) = elements(name)
+  def getOperator(name: String) = elements(name)
 
   private def addNilad(name: String)(fn: Nilad): Nilad = {
-    elements += name -> Commands.Command(
-      (a: Seq[Any]) => (ctx: Ctx) ?=> fn()(using ctx),
-      0
-    )
+    elements += name -> Operator((a: Seq[Any]) => fn(), 0)
     fn
   }
   private def addMonad(name: String)(fn: Monad): Monad = {
-    elements += name -> Commands.Command(
-      (a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0))(using ctx),
-      1
-    )
+    elements += name -> Operator((a: Seq[Any]) => fn(a(0)), 1)
     fn
   }
   private def addDyad(name: String)(fn: Dyad): Dyad = {
-    elements += name -> Commands.Command(
-      (a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0), a(1))(using ctx),
-      2
-    )
+    elements += name -> Operator((a: Seq[Any]) => fn(a(0), a(1)), 2)
     fn
   }
   private def addTriad(name: String)(fn: Triad): Triad = {
-    elements += name -> Commands.Command(
-      (a: Seq[Any]) => (ctx: Ctx) ?=> fn(a(0), a(1), a(2))(using ctx),
-      3
-    )
+    elements += name -> Operator((a: Seq[Any]) => fn(a(0), a(1), a(2)), 3)
     fn
   }
 
@@ -122,8 +110,8 @@ object Commands {
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
   val dropOne = addMonad("D") {
     case (a: Seq[Any]) => a.drop(1)
-    case (a: String) => a.drop(1)
-    case (a: Number) => ???
+    case (a: String)   => a.drop(1)
+    case (a: Number)   => ???
   }
   val binomial = addDyad("B")(vect2 {
     case (a: Number, b: Number) =>
@@ -134,23 +122,28 @@ object Commands {
     case (a: String, b: String) => ???
   })
   val concat = addDyad("C") {
-    case (a: CSeq, b: CSeq)  => a ++ b
-    case (a: CSeq, b: CAtom) => a :+ b
-    case (a: CAtom, b: CSeq) => a +: b
+    case (a: CSeq, b: CSeq)     => a ++ b
+    case (a: CSeq, b: CAtom)    => a :+ b
+    case (a: CAtom, b: CSeq)    => a +: b
     case (a: Number, b: Number) => ???
     case (a: Number, b: String) => a.toString + b
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b
   }
-  val generator = addDyad("G") {
+  val generator: Dyad = addDyad("G") {
+    case (a: Func, b: CSeq) => generator(b, a)
+    case (a: Func, b: (Number | String)) => generator(Seq(b), a)
+    case (a: (Number | String), b: Func) => generator(Seq(a), b)
     case (a: CSeq, b: Nilad) => LazyList.continually(b()).prependedAll(a)
     case (a: CSeq, b: Monad) =>
       LazyList.iterate(a.last)(b(_)).prependedAll(a.init)
     case (a: CSeq, b: Dyad) =>
-      LazyList.unfold((a.init.last, a.last)) { s =>
-        val v = b(s._1, s._2)
-        Some((v, (s._2, v)))
-      }.prependedAll(a)
+      LazyList
+        .unfold((a.init.last, a.last)) { s =>
+          val v = b(s._1, s._2)
+          Some((v, (s._2, v)))
+        }
+        .prependedAll(a)
   }
   val prefixes = addMonad("P") {
     case (a: Number) =>
@@ -202,10 +195,10 @@ object Commands {
 
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
+}
 
-  class Command(val fn: Seq[Any] => Ctx ?=> Any, val arity: Int)
+class Operator(val fn: Seq[Any] => Ctx ?=> Any, val arity: Int)
 
-  object Command {
-    def unapply(c: Command) = Some(c.fn, c.arity)
-  }
+object Operator {
+  def unapply(c: Operator) = Some(c.fn, c.arity)
 }

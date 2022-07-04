@@ -15,7 +15,7 @@ class Interpreter(program: Iterator[AST]) {
     case NumberLiteral(_) => 0
     case StringLiteral(_) => 0
     case Ref(_)           => 0
-    case Command(s)       => Commands.getCommand(s).arity
+    case Oper(s)          => Operators.getOperator(s).arity
   }
   def interpretAST(using ctx: Ctx)(ast: AST): Any = {
     ast match {
@@ -25,32 +25,29 @@ class Interpreter(program: Iterator[AST]) {
         astArity(a) match {
           case 0 => (() => interpretAST(a))
           case 1 => (
-            (l: Any) =>
-              (ctx: Ctx) ?=>
-                Commands
-                  .getCommand(a.asInstanceOf[Command].name)
-                  .fn(Seq(l))(using ctx)
+            (l: Any) => ctx ?=>
+              Operators
+                .getOperator(a.asInstanceOf[Oper].name)
+                .fn(Seq(l))(using ctx)
           )
           case 2 => (
-            (l: Any, r: Any) =>
-              (ctx: Ctx) ?=>
-                Commands
-                  .getCommand(a.asInstanceOf[Command].name)
-                  .fn(Seq(l, r))(using ctx)
+            (l: Any, r: Any) => ctx ?=>
+              Operators
+                .getOperator(a.asInstanceOf[Oper].name)
+                .fn(Seq(l, r))(using ctx)
           )
           case 3 => (
-            (l: Any, r: Any, o: Any) =>
-              (ctx: Ctx) ?=>
-                Commands
-                  .getCommand(a.asInstanceOf[Command].name)
-                  .fn(Seq(l, r, o))(using ctx)
+            (l: Any, r: Any, o: Any) => ctx ?=>
+              Operators
+                .getOperator(a.asInstanceOf[Oper].name)
+                .fn(Seq(l, r, o))(using ctx)
           )
         }
-      case Command(s) => {
-        val Commands.Command(fn, arity) = Commands.getCommand(s)
+      case Oper(s) => {
+        val Operator(fn, arity) = Operators.getOperator(s)
         val args = 1 to arity map { _ =>
           if (program.hasNext) interpretAST(program.next)
-          else interpretAST(Command("?"))
+          else interpretAST(Oper("?"))
         }
         fn(args)(using ctx)
       }
@@ -82,8 +79,7 @@ object Interpreter {
           case Left(_) => x
         }
       } else if (x.startsWith("\"") && x.endsWith("\""))
-        x.drop(1)
-          .dropRight(1)
+        x.init.tail
           .replace("\\\"", "\"")
           .replace("\\n", "\n")
           .replace("\\\\", "\\")
