@@ -16,7 +16,7 @@
         white-space: pre-wrap;
         font-family: "DejaVu Sans Mono";
         margin-top: 15px;
-        font-size: .9rem;
+        font-size: 0.9rem;
       }
       .too-many {
         margin-top: 10px;
@@ -32,7 +32,7 @@
         margin-top: 30px;
         margin-bottom: 30px;
       }
-      button {
+      button:not(.run):not(.gen):not(.cgcc) {
         font-family: inherit;
         background-color: #1b8dff;
         color: white;
@@ -42,7 +42,7 @@
         cursor: pointer;
         margin-right: 10px;
       }
-      button:hover {
+      button:not(.run):not(.gen):not(.cgcc):hover {
         background-color: #0f65bb;
       }
       textarea {
@@ -68,7 +68,8 @@
         margin-top: 15px;
       }
 
-      #code, #inputs {
+      #code,
+      #inputs {
         width: 100%;
         height: 300px;
         border: 1px solid #ccc;
@@ -78,12 +79,53 @@
       #inputs {
         height: 150px;
       }
+      .run, .gen, .cgcc {
+        background: none;
+        border: none;
+        outline: none !important;
+        cursor: pointer;
+      }
+      svg {
+        width: 25px;
+        fill: #000000;
+        transition: fill .2s;
+      }
+      .btns button:hover svg {
+        fill: rgb(0, 119, 238);
+      }
+
+      .btns {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        justify-content: center;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <p><button class="run">Run!</button> <button class="gen">Generate Link</button> <button class="cgcc">Generate CGCC Submission</button></p>
-      <div><label for="code">Code:</label></div>
+      <p class="btns">
+        <button title="Run" class="run">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M361 215C375.3 223.8 384 239.3 384 256C384 272.7 375.3 288.2 361 296.1L73.03 472.1C58.21 482 39.66 482.4 24.52 473.9C9.377 465.4 0 449.4 0 432V80C0 62.64 9.377 46.63 24.52 38.13C39.66 29.64 58.21 29.99 73.03 39.04L361 215z"/></svg>
+        </button>
+        <button title="Generate Link" class="gen">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+            <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M172.5 131.1C228.1 75.51 320.5 75.51 376.1 131.1C426.1 181.1 433.5 260.8 392.4 318.3L391.3 319.9C381 334.2 361 337.6 346.7 327.3C332.3 317 328.9 297 339.2 282.7L340.3 281.1C363.2 249 359.6 205.1 331.7 177.2C300.3 145.8 249.2 145.8 217.7 177.2L105.5 289.5C73.99 320.1 73.99 372 105.5 403.5C133.3 431.4 177.3 435 209.3 412.1L210.9 410.1C225.3 400.7 245.3 404 255.5 418.4C265.8 432.8 262.5 452.8 248.1 463.1L246.5 464.2C188.1 505.3 110.2 498.7 60.21 448.8C3.741 392.3 3.741 300.7 60.21 244.3L172.5 131.1zM467.5 380C411 436.5 319.5 436.5 263 380C213 330 206.5 251.2 247.6 193.7L248.7 192.1C258.1 177.8 278.1 174.4 293.3 184.7C307.7 194.1 311.1 214.1 300.8 229.3L299.7 230.9C276.8 262.1 280.4 306.9 308.3 334.8C339.7 366.2 390.8 366.2 422.3 334.8L534.5 222.5C566 191 566 139.1 534.5 108.5C506.7 80.63 462.7 76.99 430.7 99.9L429.1 101C414.7 111.3 394.7 107.1 384.5 93.58C374.2 79.2 377.5 59.21 391.9 48.94L393.5 47.82C451 6.731 529.8 13.25 579.8 63.24C636.3 119.7 636.3 211.3 579.8 267.7L467.5 380z"
+            />
+          </svg>
+        </button>
+        <button class="cgcc" title="Generate CGCC Submission">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M223.7 130.8L149.1 7.77C147.1 2.949 141.9 0 136.3 0H16.03c-12.95 0-20.53 14.58-13.1 25.18l111.3 158.9C143.9 156.4 181.7 137.3 223.7 130.8zM256 160c-97.25 0-176 78.75-176 176S158.8 512 256 512s176-78.75 176-176S353.3 160 256 160zM348.5 317.3l-37.88 37l8.875 52.25c1.625 9.25-8.25 16.5-16.63 12l-46.88-24.62L209.1 418.5c-8.375 4.5-18.25-2.75-16.63-12l8.875-52.25l-37.88-37C156.6 310.6 160.5 299 169.9 297.6l52.38-7.625L245.7 242.5c2-4.25 6.125-6.375 10.25-6.375S264.2 238.3 266.2 242.5l23.5 47.5l52.38 7.625C351.6 299 355.4 310.6 348.5 317.3zM495.1 0H375.7c-5.621 0-10.83 2.949-13.72 7.77l-73.76 122.1c42 6.5 79.88 25.62 109.5 53.38l111.3-158.9C516.5 14.58 508.9 0 495.1 0z"
+            />
+          </svg>
+        </button>
+      </p>
+      <div><label for="code">Code: <span class="bytecount">0</span> bytes</label></div>
       <div id="code"></div>
       <div><label for="inputs">Inputs:</label></div>
       <div id="inputs"></div>
@@ -92,26 +134,33 @@
       <button class="copy" style="display: none">Copy to Clipboard</button>
     </div>
 
-		<script>
+    <script>
       let codeEditor, inputEditor;
-			require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs' } });
-			require(['vs/editor/editor.main'], function () {
-				codeEditor = monaco.editor.create(document.querySelector('#code'), {
-					language: 'plaintext',
+      require.config({
+        paths: {
+          vs: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs",
+        },
+      });
+      require(["vs/editor/editor.main"], function () {
+        codeEditor = monaco.editor.create(document.querySelector("#code"), {
+          language: "plaintext",
           lineNumbers: "off",
           minimap: {
-            enabled: false
+            enabled: false,
           },
           folding: false,
-				});
-				inputEditor = monaco.editor.create(document.querySelector('#inputs'), {
-					language: 'plaintext',
+        });
+        inputEditor = monaco.editor.create(document.querySelector("#inputs"), {
+          language: "plaintext",
           lineNumbers: "off",
           minimap: {
-            enabled: false
+            enabled: false,
           },
           folding: false,
-				});
+        });
+        codeEditor.onDidChangeModelContent(() => {
+          $('.bytecount').innerText = codeEditor.getValue().replace(/\r\n/g, "\n").length;
+        });
         if (location.hash) {
           try {
             const code = location.hash.substr(1);
@@ -120,18 +169,18 @@
             inputEditor.setValue(i);
           } catch (e) {}
         }
-			});
-		</script>
+      });
+    </script>
     <script>
-      const $ = x => document.querySelector(x);
-      const $$ = x => document.querySelectorAll(x);
+      const $ = (x) => document.querySelector(x);
+      const $$ = (x) => document.querySelectorAll(x);
       $(".run").addEventListener("click", () => {
         $(".output").innerText = "";
         $(".too-many").innerText = "";
-        $('.copy').style.display = '';
+        $(".copy").style.display = "";
         const out = Chocolate.execute(
-          codeEditor.getValue(),
-          inputEditor.getValue().split("\n").filter(Boolean)
+          codeEditor.getValue().replace(/\r\n/g, "\n"),
+          inputEditor.getValue().replace(/\r\n/g, "\n").split("\n").filter(Boolean)
         ).slice(-1)[0];
         const stringify = (x) =>
           Array.isArray(x)
@@ -154,8 +203,7 @@
             if (next.done) {
               break;
             }
-            $(".output").innerText +=
-              (i !== 0 ? ", " : "") + stringify(next.value);
+            $(".output").innerText += (i !== 0 ? ", " : "") + stringify(next.value);
             i++;
           }
           $(".output").innerText += "]";
@@ -167,20 +215,17 @@
         $(".output").innerText = stringify(out);
       });
       $(".gen").addEventListener("click", () => {
-        $('.copy').style.display = '';
-        $('.too-many').innerText = '';
+        $(".copy").style.display = "";
+        $(".too-many").innerText = "";
         location.hash =
-          "#" +
-          btoa(
-            JSON.stringify([
-              codeEditor.getValue(),
-              inputEditor.getValue(),
-            ])
-          );
-        $('.output').innerText = location.protocol + '//' + location.host + '/' + location.hash;
+          "#" + btoa(JSON.stringify([codeEditor.getValue().replace(/\r\n/g, "\n"), inputEditor.getValue().replace(/\r\n/g, "\n")]));
+        $(".output").innerText =
+          location.protocol + "//" + location.host + "/" + location.hash;
       });
       function selectElementText(el) {
-        var doc = document, sel, range;
+        var doc = document,
+          sel,
+          range;
         if (window.getSelection && doc.createRange) {
           sel = window.getSelection();
           range = doc.createRange();
@@ -193,21 +238,25 @@
           range.select();
         }
       }
-      $('.cgcc').addEventListener('click', () => {
-        $('.gen').click();
-        $('.copy').style.display = '';
-        $('.too-many').innerText = ''
-        $('.output').innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${codeEditor.getValue().length} bytes
+      $(".cgcc").addEventListener("click", () => {
+        $(".gen").click();
+        $(".copy").style.display = "";
+        $(".too-many").innerText = "";
+        $(
+          ".output"
+        ).innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${
+          codeEditor.getValue().replace(/\r\n/g, "\n").length
+        } bytes
 
 \`\`\`
-${codeEditor.getValue()}
+${codeEditor.getValue().replace(/\r\n/g, "\n")}
 \`\`\`
 
-[Try it online!](${$('.output').innerText})`;
+[Try it online!](${$(".output").innerText})`;
       });
-      $('.copy').addEventListener('click', () => {
-        selectElementText($('.output'));
-        document.execCommand('copy');
+      $(".copy").addEventListener("click", () => {
+        selectElementText($(".output"));
+        document.execCommand("copy");
       });
     </script>
   </body>
