@@ -6,41 +6,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <script src="js/lib/scalajs-0.0.1.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap"
+    />
     <style>
       .output {
         white-space: pre-wrap;
-        font-family: monospace;
+        font-family: "DejaVu Sans Mono";
+        margin-top: 15px;
+        font-size: .9rem;
+      }
+      .too-many {
+        margin-top: 10px;
+      }
+      body {
+        font-family: "Open Sans";
+        display: flex;
+        justify-content: center;
+        margin: 0;
+      }
+      .container {
+        width: calc(min(95vw, 600px));
+        margin-top: 30px;
+      }
+      button {
+        font-family: inherit;
+        background-color: #1b8dff;
+        color: white;
+        padding: 8px 15px;
+        border: none;
+        border-radius: 7px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #0f65bb;
+      }
+      textarea {
+        font-family: "DejaVu Sans Mono";
+        border: 1px solid #cbcbcb;
+        border-radius: 8px;
+        width: 100% !important;
+        outline: none !important;
+        padding: 10px;
+        transition: box-shadow 0.3s;
+        margin-top: 5px;
+      }
+      textarea:focus {
+        box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
+      }
+
+      label[for="inputs"] {
+        margin-top: 15px;
+        display: inline-block;
       }
     </style>
   </head>
   <body>
-    <div><label for="code">Code:</label></div>
-    <textarea id="code"></textarea>
-    <div><label for="inputs">Inputs:</label></div>
-    <textarea id="inputs"></textarea>
-    <p><button class="run">Run!</button> <button class="gen">Generate Link</button></p>
-    <div class="output"></div>
+    <div class="container">
+      <p><button class="run">Run!</button> <button class="gen">Generate Link</button> <button class="cgcc">Generate CGCC Submission</button></p>
+      <div><label for="code">Code:</label></div>
+      <textarea id="code" rows="10"></textarea>
+      <div><label for="inputs">Inputs:</label></div>
+      <textarea id="inputs" rows="5"></textarea>
+      <div class="output"></div>
+      <div class="too-many"></div>
+      <button class="copy" style="display: none">Copy to Clipboard</button>
+    </div>
 
     <script>
+      const $ = x => document.querySelector(x);
+      const $$ = x => document.querySelectorAll(x);
       if (location.hash) {
         try {
           const code = location.hash.substr(1);
           const [c, i] = JSON.parse(atob(code));
-          document.querySelector('#code').value = c;
-          document.querySelector('#inputs').value = i;
+          $("#code").value = c;
+          $("#inputs").value = i;
         } catch (e) {}
       }
-      document.querySelector(".run").addEventListener("click", () => {
-        document.querySelector(".output").innerText = '';
-        const out = Chocolate.execute(document.querySelector("#code").value, document.querySelector("#inputs").value.split("\n").filter(Boolean)).slice(-1)[0];
+      $(".run").addEventListener("click", () => {
+        $(".output").innerText = "";
+        $(".too-many").innerText = "";
+        $('.copy').style.display = '';
+        const out = Chocolate.execute(
+          $("#code").value,
+          $("#inputs").value.split("\n").filter(Boolean)
+        ).slice(-1)[0];
         const stringify = (x) =>
           Array.isArray(x)
             ? "[" + x.map(stringify).join(", ") + "]"
             : typeof x === "string"
-            ? '"' + x.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"'
+            ? '"' +
+              x.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') +
+              '"'
             : x.toString();
         if (out.next) {
-          document.querySelector(".output").innerText += "[";
+          $(".output").innerText += "[";
           let next, tooMany;
           let i = 0;
           while (true) {
@@ -52,21 +115,58 @@
             if (next.done) {
               break;
             }
-            document.querySelector(".output").innerText += (i !== 0 ? ", " : "") + stringify(next.value);
+            $(".output").innerText +=
+              (i !== 0 ? ", " : "") + stringify(next.value);
             i++;
           }
-          document.querySelector(".output").innerText += "]";
+          $(".output").innerText += "]";
           if (tooMany) {
-            document.querySelector(".output").innerText += " (truncated to 100 items)";
+            $(".too-many").innerText = "(truncated to 100 items)";
           }
           return;
         }
-        document.querySelector(".output").innerText = stringify(
-          out
-        );
+        $(".output").innerText = stringify(out);
       });
-      document.querySelector('.gen').addEventListener('click', () => {
-        location.hash = '#' + btoa(JSON.stringify([document.querySelector('#code').value, document.querySelector('#inputs').value]));
+      $(".gen").addEventListener("click", () => {
+        $('.copy').style.display = '';
+        location.hash =
+          "#" +
+          btoa(
+            JSON.stringify([
+              $("#code").value,
+              $("#inputs").value,
+            ])
+          );
+        $('.output').innerText = location.protocol + '//' + location.hostname + '/' + location.hash;
+      });
+      function selectElementText(el) {
+        var doc = document, sel, range;
+        if (window.getSelection && doc.createRange) {
+          sel = window.getSelection();
+          range = doc.createRange();
+          range.selectNodeContents(el);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } else if (doc.body.createTextRange) {
+          range = doc.body.createTextRange();
+          range.moveToElementText(el);
+          range.select();
+        }
+      }
+      $('.cgcc').addEventListener('click', () => {
+        $('.gen').click();
+        $('.copy').style.display = '';
+        $('.output').innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${$('#code').value.length} bytes
+
+\`\`\`
+${$('#code').value}
+\`\`\`
+
+[Try it online!](${$('.output').innerText})`;
+      });
+      $('.copy').addEventListener('click', () => {
+        selectElementText($('.output'));
+        document.execCommand('copy');
       });
     </script>
   </body>
