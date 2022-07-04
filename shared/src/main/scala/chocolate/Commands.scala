@@ -104,10 +104,15 @@ object Commands {
   })
   val divide = addDyad("/")(vect2 {
     case (a: Number, b: Number) => a / b
+    case (a: String, b: Number) => chop(a, b)
+    case (a: Number, b: String) => chop(b, a)
     case (a: String, b: String) => a.split(b).toSeq
   })
-  val modulus = addDyad("%")(vect2 { case (a: Number, b: Number) =>
-    a tmod b
+  val modulus = addDyad("%")(vect2 {
+    case (a: Number, b: Number) => a tmod b
+    case (a: String, b: Number) => ???
+    case (a: Number, b: String) => ???
+    case (a: String, b: String) => ???
   })
   val exponent = addDyad("e")(vect2 { case (a: Number, b: Number) => a ** b })
   val negate = addMonad("N")(vect1 {
@@ -118,15 +123,21 @@ object Commands {
   val dropOne = addMonad("D") {
     case (a: Seq[Any]) => a.drop(1)
     case (a: String) => a.drop(1)
-    case (a: Number) => a - 1
+    case (a: Number) => ???
   }
+  val binomial = addDyad("B")(vect2 {
+    case (a: Number, b: Number) =>
+      factorial(a).asInstanceOf[Number] / (factorial(b)
+        .asInstanceOf[Number] * factorial(a - b).asInstanceOf[Number])
+    case (a: String, b: Number) => ???
+    case (a: Number, b: String) => ???
+    case (a: String, b: String) => ???
+  })
   val concat = addDyad("C") {
     case (a: CSeq, b: CSeq)  => a ++ b
     case (a: CSeq, b: CAtom) => a :+ b
     case (a: CAtom, b: CSeq) => a +: b
-    case (a: Number, b: Number) =>
-      factorial(a).asInstanceOf[Number] / (factorial(b)
-        .asInstanceOf[Number] * factorial(a - b).asInstanceOf[Number])
+    case (a: Number, b: Number) => ???
     case (a: Number, b: String) => a.toString + b
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b

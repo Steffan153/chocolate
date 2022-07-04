@@ -2,6 +2,8 @@ package chocolate
 
 import scala.collection.mutable
 import scala.annotation.nowarn
+import spire.math.Number
+import spire.math.Rational.apply
 
 def chocPrint(s: Any) = {
   @nowarn
@@ -25,5 +27,16 @@ def chocPrint(s: Any) = {
   res(s, true, false) match {
     case (x: (() => Any)) => x()
     case x => println(x)
+  }
+}
+
+def chop(a: String, b: Number) = {
+  val chunkLen = (a.length / b).toInt
+  val leftOver = a.length.tmod(b)
+  var f = 0
+  (0 until b.toInt).map { i =>
+    val len = chunkLen + (if (leftOver > i) 1 else 0)
+    f += len
+    a.drop(f - len).take(len)
   }
 }
