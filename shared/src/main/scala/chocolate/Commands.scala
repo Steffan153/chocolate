@@ -147,9 +147,10 @@ object Commands {
     case (a: CSeq, b: Monad) =>
       LazyList.iterate(a.last)(b(_)).prependedAll(a.init)
     case (a: CSeq, b: Dyad) =>
-      lazy val seq: LazyList[Any] =
-        a.to(LazyList) #::: seq.zip(seq.tail).map(b(_, _))
-      seq
+      LazyList.unfold((a.init.last, a.last)) { s =>
+        val v = b(s._1, s._2)
+        Some((v, (s._2, v)))
+      }.prependedAll(a)
   }
   val prefixes = addMonad("P") {
     case (a: Number) =>
