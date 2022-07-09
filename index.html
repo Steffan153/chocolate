@@ -164,7 +164,7 @@
         if (location.hash) {
           try {
             const code = location.hash.substr(1);
-            const [c, i] = JSON.parse(atob(code));
+            const [c, i] = JSON.parse(decode(code));
             codeEditor.setValue(c);
             inputEditor.setValue(i);
           } catch (e) {}
@@ -214,11 +214,13 @@
         }
         $(".output").innerText = stringify(out);
       });
+      const encode = x => btoa(unescape(encodeURIComponent(x.replace(/\r\n/g, "\n"))));
+      const decode = x => decodeURIComponent(escape(atob(x)));
       $(".gen").addEventListener("click", () => {
         $(".copy").style.display = "";
         $(".too-many").innerText = "";
         location.hash =
-          "#" + btoa(JSON.stringify([codeEditor.getValue().replace(/\r\n/g, "\n"), inputEditor.getValue().replace(/\r\n/g, "\n")]));
+          "#" + encode(JSON.stringify([codeEditor.getValue(), inputEditor.getValue()]));
         $(".output").innerText =
           location.protocol + "//" + location.host + "/" + location.hash;
       });
