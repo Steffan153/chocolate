@@ -166,6 +166,13 @@ object Operators {
       a.scanLeft(LazyList[Any]()) { _ appended _ }.drop(1)
     case (a: CSeq) => a.scanLeft(Seq[Any]()) { _ appended _ }.drop(1)
   }
+  val ord = addMonad("O")(vect1 {
+    case (a: Number) => a.toChar.toString
+    case (a: String) => if (a.length == 1) Number(a.head) else a.map(Number(_))
+  })
+  val transliterate = addTriad("∂") {
+    case (b: String, c: String, a: String) => a.map { x => if (b contains x) c(b.indexOf(x)) else x }
+  }
   val sliceUntil: Dyad = addDyad(":") {
     case (a: CSeq, b: Number)          => a.take(b.toInt)
     case (a: String, b: Number)        => a.take(b.toInt)
@@ -210,6 +217,10 @@ object Operators {
     case None => ctx.inputCycle.next()
   } }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
+  addNilad("ca") { () => "abcdefghijklmnopqrstuvwxyz" }
+  addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
+  addNilad("cZ") { () => "ZYXWVUTSRQPONMLKJIHGFEDCBA" }
+  addNilad("cz") { () => "zyxwvutsrqponmlkjihgfedcba" }
 }
 
 class Operator(val fn: Seq[Any] => Ctx ?=> Any, val arity: Int)
