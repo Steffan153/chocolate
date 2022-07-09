@@ -39,7 +39,7 @@ object Operators {
 
   private def vect1(fn: Monad): Monad = {
     lazy val res: Monad = {
-      case x: CSeq => x.map(res)
+      case x: CSeq => x.map(res(_))
       case x       => fn(x)
     }
     res
@@ -102,7 +102,9 @@ object Operators {
     case (a: Number, b: String) => ???
     case (a: String, b: String) => ???
   })
-  val exponent = addDyad("e")(vect2 { case (a: Number, b: Number) => a ** b })
+  val exponent: Dyad = addDyad("e")(vect2 { case (a: Number, b: Number) =>
+    a ** b
+  })
   val negate = addMonad("N")(vect1 {
     case (a: Number) => -a
     case (a: String) => a.map { x => if (x.isUpper) x.toLower else x.toUpper }
@@ -111,6 +113,11 @@ object Operators {
   val dropOne = addMonad("D") {
     case (a: Seq[Any]) => a.drop(1)
     case (a: String)   => a.drop(1)
+    case (a: Number)   => ???
+  }
+  val reverse = addMonad("⅃") {
+    case (a: Seq[Any]) => a.reverse
+    case (a: String)   => a.reverse
     case (a: Number)   => ???
   }
   val binomial = addDyad("B")(vect2 {
@@ -131,7 +138,7 @@ object Operators {
     case (a: String, b: String) => a + b
   }
   val generator: Dyad = addDyad("G") {
-    case (a: Func, b: CSeq) => generator(b, a)
+    case (a: Func, b: CSeq)              => generator(b, a)
     case (a: Func, b: (Number | String)) => generator(Seq(b), a)
     case (a: (Number | String), b: Func) => generator(Seq(a), b)
     case (a: CSeq, b: Nilad) => LazyList.continually(b()).prependedAll(a)
@@ -159,10 +166,14 @@ object Operators {
       a.scanLeft(LazyList[Any]()) { _ appended _ }.drop(1)
     case (a: CSeq) => a.scanLeft(Seq[Any]()) { _ appended _ }.drop(1)
   }
-  val sliceUntil = addDyad(":") {
-    case (a: LazyList[Any], b: Number) => a.take(b.toInt)
+  val sliceUntil: Dyad = addDyad(":") {
     case (a: CSeq, b: Number)          => a.take(b.toInt)
     case (a: String, b: Number)        => a.take(b.toInt)
+    case (a: Number, b: CSeq)          => b.take(a.toInt)
+    case (a: Number, b: String)        => b.take(a.toInt)
+    case (a: Monad, b: CSeq)           => b.map(a(_))
+    case (a: Monad, b: String)         => b.map { x => a(x.toString) }
+    case (a: Any, b: Monad)            => sliceUntil(b, a)
   }
   val suffixes = addMonad("#s") { case (a: String) =>
     a.scanRight("")(_ +: _).init
@@ -194,6 +205,10 @@ object Operators {
   }
 
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
+  addNilad("_") { () => (ctx: Ctx) ?=> ctx.contextVar match {
+    case Some(x) => x
+    case None => ctx.inputCycle.next()
+  } }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
 }
 

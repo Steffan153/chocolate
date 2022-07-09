@@ -68,6 +68,21 @@ class Parser(private val prog: Iterator[Char]) {
         while (peek.isWhitespace)
           next()
         Ref(parseAST())
+      case '}' => CloseChar()
+      case c @ ('λ' | 'γ') =>
+        var asts = Seq[AST]()
+        breakable {
+          while (nonEmpty) {
+            parseAST() match {
+              case CloseChar() => break
+              case x => asts = asts :+ x
+            }
+          }
+        }
+        c match {
+          case 'λ' => Lam(asts)
+          case 'γ' => MapLam(asts)
+        }
       case x =>
         Oper(x.toString)
 
