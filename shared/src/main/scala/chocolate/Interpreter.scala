@@ -51,16 +51,46 @@ class Interpreter(program: Iterator[AST]) {
         }
         fn(args)(using ctx)
       case Lam(asts) =>
-        (l: Any) => (ctx: Ctx) ?=> {
-          val ct = ctx.copy
-          ct.contextVar = Some(l)
-          val iter = asts.iterator
-          interpretAST(using ct)(iter.next, iter)
+        var arity = 1
+        var ats = asts
+        if (asts.length > 1 && asts.head.isInstanceOf[NumberLiteral]) {
+          arity = asts.head.asInstanceOf[NumberLiteral].value.toInt
+          ats = asts.tail
+        }
+        arity match {
+          case 0 => () => (ctx: Ctx) ?=> {
+            val iter = ats.iterator
+            interpretAST(using ctx)(iter.next, iter)
+          }
+          case 1 => (l: Any) => (ctx: Ctx) ?=> {
+            val ct = ctx.copy
+            ct.contextVars = Iterator.continually(l)
+            val iter = ats.iterator
+            interpretAST(using ct)(iter.next, iter)
+          }
+          case 2 => (l: Any, r: Any) => (ctx: Ctx) ?=> {
+            val ct = ctx.copy
+            lazy val temp: LazyList[Any] = l #:: r #:: temp
+            ct.contextVars = temp.iterator
+            ct.contextVarsSeq = Seq(l, r)
+            val iter = ats.iterator
+            interpretAST(using ct)(iter.next, iter)
+          }
+          case 3 => (l: Any, r: Any, o: Any) => (ctx: Ctx) ?=> {
+            val ct = ctx.copy
+            lazy val temp: LazyList[Any] = l #:: r #:: o #:: temp
+            ct.contextVars = temp.iterator
+            ct.contextVarsSeq = Seq(l, r, o)
+            val iter = ats.iterator
+            interpretAST(using ct)(iter.next, iter)
+          }
+          case n => throw new Exception("Invalid arity of function, should be 1, 2, or 3")
         }
       case MapLam(asts) =>
         val l = (l: Any) => (ctx: Ctx) ?=> {
           val ct = ctx.copy
-          ct.contextVar = Some(l)
+          ct.contextVars = Iterator.continually(l)
+          ct.contextVarsSeq = Seq(l)
           val iter = asts.iterator
           interpretAST(using ct)(iter.next, iter)
         }
@@ -72,6 +102,13 @@ class Interpreter(program: Iterator[AST]) {
           case x: Number =>
             (BigInt(1) to x.toBigInt).map(x => l(Number(x)))
         }
+      case SeqBuild(asts) =>
+        val iter = asts.iterator
+        var seq = Seq[Any]()
+        while (iter.hasNext) {
+          seq = seq :+ interpretAST(iter.next, iter)
+        }
+        seq
       case n => n
     }
   }

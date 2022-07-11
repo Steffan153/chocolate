@@ -68,6 +68,17 @@ class Parser(private val prog: Iterator[Char]) {
         while (peek.isWhitespace)
           next()
         Ref(parseAST())
+      case '[' =>
+        var asts = Seq[AST]()
+        breakable {
+          while (nonEmpty) {
+            parseAST() match
+              case WhiteSpace() =>
+              case CloseChar() => break
+              case x => asts = asts :+ x
+          }
+        }
+        SeqBuild(asts)
       case '}' => CloseChar()
       case c @ ('λ' | 'γ') =>
         var asts = Seq[AST]()
@@ -75,6 +86,7 @@ class Parser(private val prog: Iterator[Char]) {
           while (nonEmpty) {
             parseAST() match {
               case CloseChar() => break
+              case WhiteSpace() =>
               case x => asts = asts :+ x
             }
           }
@@ -90,7 +102,7 @@ class Parser(private val prog: Iterator[Char]) {
     var asts = List[AST]()
     while (nonEmpty)
       parseAST() match
-        case _: WhiteSpace =>
+        case WhiteSpace() =>
         case ast           => asts = asts :+ ast
     asts
 }

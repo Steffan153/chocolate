@@ -137,6 +137,9 @@ object Operators {
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b
   }
+  val double = addMonad("Д") {
+    case (a: Number) => a * 2
+  }
   val generator: Dyad = addDyad("G") {
     case (a: Func, b: CSeq)              => generator(b, a)
     case (a: Func, b: (Number | String)) => generator(Seq(b), a)
@@ -149,6 +152,13 @@ object Operators {
         .unfold((a.init.last, a.last)) { s =>
           val v = b(s._1, s._2)
           Some((v, (s._2, v)))
+        }
+        .prependedAll(a)
+    case (a: CSeq, b: Triad) =>
+      LazyList
+        .unfold((a.dropRight(2).last, a.init.last, a.last)) { s =>
+          val v = b(s._1, s._2, s._3)
+          Some((v, (s._2, s._3, v)))
         }
         .prependedAll(a)
   }
@@ -212,10 +222,10 @@ object Operators {
   }
 
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
-  addNilad("_") { () => (ctx: Ctx) ?=> ctx.contextVar match {
-    case Some(x) => x
-    case None => ctx.inputCycle.next()
-  } }
+  addNilad("_") { () => (ctx: Ctx) ?=> if (ctx.contextVars.hasNext) ctx.contextVars.next() else ctx.inputCycle.next() }
+  addNilad("#_") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq }
+  addNilad("#0") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq.head }
+  addNilad("#1") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq(1) }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
   addNilad("ca") { () => "abcdefghijklmnopqrstuvwxyz" }
   addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
