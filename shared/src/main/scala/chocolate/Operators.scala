@@ -180,6 +180,9 @@ object Operators {
     case (a: Number) => a.toChar.toString
     case (a: String) => if (a.length == 1) Number(a.head) else a.map(Number(_))
   })
+  val flat = addMonad("F") {
+    case (a: Seq[CSeq]) => a.flatten
+  }
   val transliterate = addTriad("∂") {
     case (b: String, c: String, a: String) => a.map { x => if (b contains x) c(b.indexOf(x)) else x }
   }
