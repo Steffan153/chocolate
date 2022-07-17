@@ -10,39 +10,10 @@ import shapeless.Lazy
 class CFun(val fn: Func)
 
 class Interpreter(program: Iterator[AST]) {
-  @nowarn
-  def astArity(ast: AST): Int = ast match {
-    case NumberLiteral(_) => 0
-    case StringLiteral(_) => 0
-    case Ref(_)           => 0
-    case Oper(s)          => Operators.getOperator(s).arity
-  }
   def interpretAST(using ctx: Ctx)(ast: AST, prog: Iterator[AST]): Any = {
     ast match {
       case NumberLiteral(n) => Number(n)
       case StringLiteral(s) => s
-      case Ref(a) =>
-        astArity(a) match {
-          case 0 => (() => interpretAST(a, prog))
-          case 1 => (
-            (l: Any) => ctx ?=>
-              Operators
-                .getOperator(a.asInstanceOf[Oper].name)
-                .fn(Seq(l))(using ctx)
-          )
-          case 2 => (
-            (l: Any, r: Any) => ctx ?=>
-              Operators
-                .getOperator(a.asInstanceOf[Oper].name)
-                .fn(Seq(l, r))(using ctx)
-          )
-          case 3 => (
-            (l: Any, r: Any, o: Any) => ctx ?=>
-              Operators
-                .getOperator(a.asInstanceOf[Oper].name)
-                .fn(Seq(l, r, o))(using ctx)
-          )
-        }
       case Oper(s) =>
         val Operator(fn, arity) = Operators.getOperator(s)
         val args = 1 to arity map { _ =>
@@ -50,6 +21,31 @@ class Interpreter(program: Iterator[AST]) {
           else interpretAST(Oper("_"), prog)
         }
         fn(args)(using ctx)
+      case MonadicModified(at, mod) =>
+        lazy val func: AST => Func = { at => at match {
+          case _: NumberLiteral => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
+          case _: StringLiteral => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
+          case _: Lam => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
+          case MonadicModified(ast, mod) => Modifiers.monadicModifiers(mod)(func(ast))
+          case o: Oper =>
+            val Operator(fn, arity) = Operators.getOperator(o.name)
+            arity match {
+              case 0 => () => (ctx: Ctx) ?=> fn(Seq())(using ctx)
+              case 1 => (x: Any) => (ctx: Ctx) ?=> fn(Seq(x))(using ctx)
+              case 2 => (x: Any, y: Any) => (ctx: Ctx) ?=> fn(Seq(x, y))(using ctx)
+              case 3 => (x: Any, y: Any, z: Any) => (ctx: Ctx) ?=> fn(Seq(x, y, z))(using ctx)
+            }
+        } }
+        val getArg = { () =>
+          if (prog.hasNext) interpretAST(prog.next, prog)
+          else interpretAST(Oper("_"), prog)
+        }
+        Modifiers.monadicModifiers(mod)(func(at)) match {
+          case f: Nilad => f()(using ctx)
+          case f: Monad => f(getArg())(using ctx)
+          case f: Dyad => f(getArg(), getArg())(using ctx)
+          case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
+        }
       case Lam(asts) =>
         var arity = 1
         var ats = asts

@@ -64,10 +64,6 @@ class Parser(private val prog: Iterator[Char]) {
           case c => Oper("#" + c.toString)
         }
       case 'c' => Oper("c" + next().toString)
-      case '^' =>
-        while (peek.isWhitespace)
-          next()
-        Ref(parseAST())
       case '[' =>
         var asts = Seq[AST]()
         breakable {
@@ -95,6 +91,10 @@ class Parser(private val prog: Iterator[Char]) {
           case 'λ' => Lam(asts)
           case 'γ' => MapLam(asts)
         }
+      case x if Modifiers.monadicModifiers.contains(x.toString) =>
+        while (peek.isWhitespace)
+          next()
+        MonadicModified(parseAST(), x.toString)
       case x =>
         Oper(x.toString)
 

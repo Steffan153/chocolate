@@ -137,6 +137,11 @@ object Operators {
     case (a: String, b: Number) => a + b.toString
     case (a: String, b: String) => a + b
   }
+  val head = addMonad("Ḣ") {
+    case (a: Number) => ???
+    case (a: String) => a.take(1)
+    case (a: CSeq) => a.head
+  }
   val double = addMonad("Д") {
     case (a: Number) => a * 2
   }
@@ -219,11 +224,42 @@ object Operators {
     }
     p
   }
-  val infiniteNumbers = addNilad("#i") { () =>
-    lazy val l: LazyList[Number] = Number.one #:: l.map(_ + 1)
-    l
+  val interleave = addDyad("Ỵ") {
+    case (a: String, b: String) =>
+      val ai = a.iterator
+      val bi = b.iterator
+      val str = new StringBuilder
+      while (ai.hasNext || bi.hasNext) {
+        if (ai.hasNext) str.append(ai.next)
+        if (bi.hasNext) str.append(bi.next)
+      }
+      str.mkString
+    case (a: CSeq, b: CSeq) =>
+      val ai = a.iterator
+      val bi = b.iterator
+      LazyList.unfold((ai, bi)) {
+        (a, b) =>
+          if (a.hasNext && !b.hasNext) Some((Seq(a.next), (a, b)))
+          else if (!a.hasNext && b.hasNext) Some((Seq(b.next), (a, b)))
+          else if (a.hasNext && b.hasNext) Some((Seq(a.next, b.next), (a, b)))
+          else None
+      }.flatten
   }
 
+  addNilad("#i") { () =>
+    lazy val a: LazyList[Number] = Number.one #:: a.map(_ + 1)
+    a
+  }
+  addNilad("#I") { () =>
+    lazy val a: LazyList[Number] = Number.one #:: -Number.one #:: a.map { x => if (x < 0) x - 1 else x + 1 }
+    Number.zero #:: a
+  }
+  addNilad("#Ḟ") { () =>
+    Number.zero #:: Number.one #:: LazyList.unfold((Number.zero, Number.one)) { s =>
+      val v = s._1 + s._2
+      Some((v, (s._2, v)))
+    }
+  }
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
   addNilad("_") { () => (ctx: Ctx) ?=> if (ctx.contextVars.hasNext) ctx.contextVars.next() else ctx.inputCycle.next() }
   addNilad("#_") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq }
@@ -234,6 +270,14 @@ object Operators {
   addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
   addNilad("cZ") { () => "ZYXWVUTSRQPONMLKJIHGFEDCBA" }
   addNilad("cz") { () => "zyxwvutsrqponmlkjihgfedcba" }
+  addNilad("cb") { () => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" }
+  addNilad("cy") { () => "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA" }
+  addNilad("cc") { () => "bcdfghjklmnpqrstvwxyz" }
+  addNilad("cċ") { () => "bcdfghjklmnpqrstvwxz" }
+  addNilad("cv") { () => "aeiou" }
+  addNilad("cṽ") { () => "aeiouy" }
+  addNilad("cV") { () => "AEIOU" }
+  addNilad("cṿ") { () => "aeiouAEIOU" }
 }
 
 class Operator(val fn: Seq[Any] => Ctx ?=> Any, val arity: Int)
