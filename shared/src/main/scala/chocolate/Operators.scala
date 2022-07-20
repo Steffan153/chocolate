@@ -14,7 +14,6 @@ type Func = Nilad | Monad | Dyad | Triad
 type CSeq = Seq[Any]
 type CAtom = String | Number | Func
 
-@nowarn
 object Operators {
   val elements = mut.Map[String, Operator]()
 
@@ -145,28 +144,6 @@ object Operators {
   val double = addMonad("Д") {
     case (a: Number) => a * 2
   }
-  val generator: Dyad = addDyad("G") {
-    case (a: Func, b: CSeq)              => generator(b, a)
-    case (a: Func, b: (Number | String)) => generator(Seq(b), a)
-    case (a: (Number | String), b: Func) => generator(Seq(a), b)
-    case (a: CSeq, b: Nilad) => LazyList.continually(b()).prependedAll(a)
-    case (a: CSeq, b: Monad) =>
-      LazyList.iterate(a.last)(b(_)).prependedAll(a.init)
-    case (a: CSeq, b: Dyad) =>
-      LazyList
-        .unfold((a.init.last, a.last)) { s =>
-          val v = b(s._1, s._2)
-          Some((v, (s._2, v)))
-        }
-        .prependedAll(a)
-    case (a: CSeq, b: Triad) =>
-      LazyList
-        .unfold((a.dropRight(2).last, a.init.last, a.last)) { s =>
-          val v = b(s._1, s._2, s._3)
-          Some((v, (s._2, s._3, v)))
-        }
-        .prependedAll(a)
-  }
   val prefixes = addMonad("P") {
     case (a: Number) =>
       var divisors = Seq[Number]()
@@ -186,7 +163,10 @@ object Operators {
     case (a: String) => if (a.length == 1) Number(a.head) else a.map(Number(_))
   })
   val flat = addMonad("F") {
-    case (a: Seq[CSeq]) => a.flatten
+    case (a: Seq[Any]) => a.flatMap {
+      case x: Seq[Any] => x
+      case x => Seq(x)
+    }
   }
   val transliterate = addTriad("∂") {
     case (b: String, c: String, a: String) => a.map { x => if (b contains x) c(b.indexOf(x)) else x }
@@ -196,9 +176,6 @@ object Operators {
     case (a: String, b: Number)        => a.take(b.toInt)
     case (a: Number, b: CSeq)          => b.take(a.toInt)
     case (a: Number, b: String)        => b.take(a.toInt)
-    case (a: Monad, b: CSeq)           => b.map(a(_))
-    case (a: Monad, b: String)         => b.map { x => a(x.toString) }
-    case (a: Any, b: Monad)            => sliceUntil(b, a)
   }
   val suffixes = addMonad("#s") { case (a: String) =>
     a.scanRight("")(_ +: _).init

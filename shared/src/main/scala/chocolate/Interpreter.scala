@@ -9,9 +9,18 @@ import shapeless.Lazy
 
 class CFun(val fn: Func)
 
-class Interpreter(program: Iterator[AST]) {
+object Interpreter {
+  def interpretIter(program: Iterator[AST])(using ctx: Ctx) = {
+    var res = Seq[Any]()
+    while (program.nonEmpty) {
+      res = res :+ Interpreter.interpretAST(program.next, program)
+    }
+    res
+  }
+
   def interpretAST(using ctx: Ctx)(ast: AST, prog: Iterator[AST]): Any = {
     ast match {
+      case Const(x)         => x
       case NumberLiteral(n) => Number(n)
       case StringLiteral(s) => s
       case Oper(s) =>
@@ -22,82 +31,50 @@ class Interpreter(program: Iterator[AST]) {
         }
         fn(args)(using ctx)
       case MonadicModified(at, mod) =>
-        lazy val func: AST => Func = { at => at match {
-          case _: NumberLiteral => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
-          case _: StringLiteral => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
-          case _: Lam => () => (ctx: Ctx) ?=> interpretAST(using ctx)(at, prog)
-          case MonadicModified(ast, mod) => Modifiers.monadicModifiers(mod)(func(ast))
-          case o: Oper =>
-            val Operator(fn, arity) = Operators.getOperator(o.name)
-            arity match {
-              case 0 => () => (ctx: Ctx) ?=> fn(Seq())(using ctx)
-              case 1 => (x: Any) => (ctx: Ctx) ?=> fn(Seq(x))(using ctx)
-              case 2 => (x: Any, y: Any) => (ctx: Ctx) ?=> fn(Seq(x, y))(using ctx)
-              case 3 => (x: Any, y: Any, z: Any) => (ctx: Ctx) ?=> fn(Seq(x, y, z))(using ctx)
-            }
-        } }
         val getArg = { () =>
           if (prog.hasNext) interpretAST(prog.next, prog)
           else interpretAST(Oper("_"), prog)
         }
-        Modifiers.monadicModifiers(mod)(func(at)) match {
+        Modifiers.monadicModifiers(mod)(astToFunc(at)) match {
           case f: Nilad => f()(using ctx)
           case f: Monad => f(getArg())(using ctx)
-          case f: Dyad => f(getArg(), getArg())(using ctx)
+          case f: Dyad  => f(getArg(), getArg())(using ctx)
           case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
         }
-      case Lam(asts) =>
-        var arity = 1
-        var ats = asts
-        if (asts.length > 1 && asts.head.isInstanceOf[NumberLiteral]) {
-          arity = asts.head.asInstanceOf[NumberLiteral].value.toInt
-          ats = asts.tail
+      case DyadicModified(at, at2, mod) =>
+        val getArg = { () =>
+          if (prog.hasNext) interpretAST(prog.next, prog)
+          else interpretAST(Oper("_"), prog)
         }
-        arity match {
-          case 0 => () => (ctx: Ctx) ?=> {
-            val iter = ats.iterator
-            interpretAST(using ctx)(iter.next, iter)
-          }
-          case 1 => (l: Any) => (ctx: Ctx) ?=> {
-            val ct = ctx.copy
-            ct.contextVars = Iterator.continually(l)
-            val iter = ats.iterator
-            interpretAST(using ct)(iter.next, iter)
-          }
-          case 2 => (l: Any, r: Any) => (ctx: Ctx) ?=> {
-            val ct = ctx.copy
-            lazy val temp: LazyList[Any] = l #:: r #:: temp
-            ct.contextVars = temp.iterator
-            ct.contextVarsSeq = Seq(l, r)
-            val iter = ats.iterator
-            interpretAST(using ct)(iter.next, iter)
-          }
-          case 3 => (l: Any, r: Any, o: Any) => (ctx: Ctx) ?=> {
-            val ct = ctx.copy
-            lazy val temp: LazyList[Any] = l #:: r #:: o #:: temp
-            ct.contextVars = temp.iterator
-            ct.contextVarsSeq = Seq(l, r, o)
-            val iter = ats.iterator
-            interpretAST(using ct)(iter.next, iter)
-          }
-          case n => throw new Exception("Invalid arity of function, should be 1, 2, or 3")
+        Modifiers.dyadicModifiers(mod)(astToFunc(at), astToFunc(at2)) match {
+          case f: Nilad => f()(using ctx)
+          case f: Monad => f(getArg())(using ctx)
+          case f: Dyad  => f(getArg(), getArg())(using ctx)
+          case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
         }
       case MapLam(asts) =>
-        val l = (l: Any) => (ctx: Ctx) ?=> {
-          val ct = ctx.copy
-          ct.contextVars = Iterator.continually(l)
-          ct.contextVarsSeq = Seq(l)
-          val iter = asts.iterator
-          interpretAST(using ct)(iter.next, iter)
-        }
-        val nex = if (prog.hasNext) interpretAST(prog.next, prog)
-        else interpretAST(Oper("_"), prog)
+        val l = (l: Any) =>
+          (ctx: Ctx) ?=> {
+            val ct = ctx.copy
+            ct.contextVars = Iterator.continually(l)
+            ct.contextVarsSeq = Seq(l)
+            if (asts.isEmpty) {
+              return l
+            }
+            val iter = asts.iterator
+            interpretAST(using ct)(iter.next, iter)
+          }
+        val nex =
+          if (prog.hasNext) interpretAST(prog.next, prog)
+          else interpretAST(Oper("_"), prog)
         nex match {
-          case x: String => x.map(i => l(i.toString))
+          case x: String   => x.map(i => l(i.toString))
           case x: Seq[Any] => x.map(l(_))
           case x: Number =>
-            (BigInt(1) to x.toBigInt).map(x => l(Number(x)))
+            spireRange(1, x).map(l(_))
         }
+      case CloseChar() =>
+        throw Exception("You can't close something that hasn't been opened.")
       case SeqBuild(asts) =>
         val iter = asts.iterator
         var seq = Seq[Any]()
@@ -108,16 +85,7 @@ class Interpreter(program: Iterator[AST]) {
       case n => n
     }
   }
-  def interpret(using ctx: Ctx) = {
-    var res = Seq[Any]()
-    while (program.nonEmpty) {
-      res = res :+ interpretAST(program.next, program)
-    }
-    res
-  }
-}
 
-object Interpreter {
   def interpret(program: String, inputs: Seq[String]) = {
     given ctx: Ctx = Ctx()
     ctx.inputs = inputs.map { x =>
@@ -127,7 +95,9 @@ object Interpreter {
           case Right(x) =>
             lazy val f: Json => Seq[Any] = (x: Json) =>
               x.asArray.get.map { y =>
-                y.asNumber.map { x => Number(x.toBigDecimal.get) }.getOrElse { y.asString.getOrElse { f(y) } }
+                y.asNumber.map { x => Number(x.toBigDecimal.get) }.getOrElse {
+                  y.asString.getOrElse { f(y) }
+                }
               }
             f(x)
           case Left(_) => x
@@ -141,8 +111,8 @@ object Interpreter {
     }
     lazy val temp: LazyList[Any] = ctx.inputs.to(LazyList) #::: temp
     ctx.inputCycle = temp.iterator
-    Interpreter(
+    interpretIter(
       Parser.parse(program).iterator
-    ).interpret
+    )
   }
 }

@@ -76,7 +76,7 @@ class Parser(private val prog: Iterator[Char]) {
         }
         SeqBuild(asts)
       case '}' => CloseChar()
-      case c @ ('λ' | 'γ') =>
+      case 'γ' =>
         var asts = Seq[AST]()
         breakable {
           while (nonEmpty) {
@@ -87,10 +87,14 @@ class Parser(private val prog: Iterator[Char]) {
             }
           }
         }
-        c match {
-          case 'λ' => Lam(asts)
-          case 'γ' => MapLam(asts)
-        }
+        MapLam(asts)
+      case x if Modifiers.dyadicModifiers.contains(x.toString) =>
+        while (peek.isWhitespace)
+          next()
+        val ast1 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        DyadicModified(ast1, parseAST(), x.toString)
       case x if Modifiers.monadicModifiers.contains(x.toString) =>
         while (peek.isWhitespace)
           next()
