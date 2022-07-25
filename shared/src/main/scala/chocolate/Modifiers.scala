@@ -4,10 +4,11 @@ import scala.collection.{mutable => mut}
 import scala.annotation.nowarn
 import spire.math.Number
 
-@nowarn
 object Modifiers {
   val monadicModifiers: mut.Map[String, Func => Func] = mut.Map.empty
   val dyadicModifiers: mut.Map[String, (Func, Func) => Func] = mut.Map.empty
+  val triadicModifiers: mut.Map[String, (Func, Func, Func) => Func] = mut.Map.empty
+  val tetradicModifiers: mut.Map[String, (Func, Func, Func, Func) => Func] = mut.Map.empty
 
   monadicModifiers += "∇" -> {
     case a: Nilad => ???
@@ -46,24 +47,26 @@ object Modifiers {
     }
   }
 
-  dyadicModifiers += "¤" -> { (l, r) => (a: Any) => (ctx: Ctx) ?=>
-    (l, r) match {
-      case (l: Nilad, r: Nilad) => r()
-      case (l: Nilad, r: Monad) => r(a)
-      case (l: Nilad, r: Dyad) => r(a, a)
-      case (l: Nilad, r: Triad) => r(a, a, a)
-      case (l: Monad, r: Nilad) => l(r())
-      case (l: Monad, r: Monad) => l(r(a))
-      case (l: Monad, r: Dyad) => l(r(a, a))
-      case (l: Monad, r: Triad) => l(r(a, a, a))
-      case (l: Dyad, r: Nilad) => l(r(), a)
-      case (l: Dyad, r: Monad) => l(r(a), a)
-      case (l: Dyad, r: Dyad) => l(r(a, a), a)
-      case (l: Dyad, r: Triad) => l(r(a, a, a), a)
-      case (l: Triad, r: Nilad) => l(r(), a, a)
-      case (l: Triad, r: Monad) => l(r(a), a, a)
-      case (l: Triad, r: Dyad) => l(r(a, a), a, a)
-      case (l: Triad, r: Triad) => l(r(a, a, a), a, a)
+  private def twoFuncs(l: Func, r: Func, args: LazyList[Any])(using ctx: Ctx): Any = {
+    lazy val c: LazyList[Any] = args #::: c
+    val i = c.iterator
+    val right = r match {
+      case r: Nilad => r()
+      case r: Monad => r(i.next)
+      case r: Dyad => r(i.next, i.next)
+      case r: Triad => r(i.next, i.next, i.next)
+    }
+    l match {
+      case l: Nilad => right
+      case l: Monad => l(right)
+      case l: Dyad => l(right, i.next)
+      case l: Triad => l(right, i.next, i.next)
     }
   }
+
+  // Next two as a monad.
+  dyadicModifiers += "¤" -> { (l, r) => (a: Any) => (ctx: Ctx) ?=> twoFuncs(l, r, LazyList(a)) }
+
+  // Next two as a dyad.
+  dyadicModifiers += "¥" -> { (l, r) => (a: Any, b: Any) => (ctx: Ctx) ?=> twoFuncs(l, r, LazyList(a, b)) }
 }

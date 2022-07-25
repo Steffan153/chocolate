@@ -88,6 +88,29 @@ class Parser(private val prog: Iterator[Char]) {
           }
         }
         MapLam(asts)
+      case x if Modifiers.tetradicModifiers.contains(x.toString) =>
+        while (peek.isWhitespace)
+          next()
+        val ast1 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        val ast2 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        val ast3 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        TetradicModified(ast1, ast2, ast3, parseAST(), x.toString)
+      case x if Modifiers.triadicModifiers.contains(x.toString) =>
+        while (peek.isWhitespace)
+          next()
+        val ast1 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        val ast2 = parseAST()
+        while (peek.isWhitespace)
+          next()
+        TriadicModified(ast1, ast2, parseAST(), x.toString)
       case x if Modifiers.dyadicModifiers.contains(x.toString) =>
         while (peek.isWhitespace)
           next()

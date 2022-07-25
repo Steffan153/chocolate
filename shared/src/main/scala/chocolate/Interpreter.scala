@@ -18,6 +18,19 @@ object Interpreter {
     res
   }
 
+  private def callFunc(f: Func, prog: Iterator[AST])(using ctx: Ctx) = {
+    val getArg = { () =>
+      if (prog.hasNext) interpretAST(prog.next, prog)
+      else interpretAST(Oper("_"), prog)
+    }
+    f match {
+      case f: Nilad => f()(using ctx)
+      case f: Monad => f(getArg())(using ctx)
+      case f: Dyad  => f(getArg(), getArg())(using ctx)
+      case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
+    }
+  }
+
   def interpretAST(using ctx: Ctx)(ast: AST, prog: Iterator[AST]): Any = {
     ast match {
       case Const(x)         => x
@@ -31,27 +44,13 @@ object Interpreter {
         }
         fn(args)(using ctx)
       case MonadicModified(at, mod) =>
-        val getArg = { () =>
-          if (prog.hasNext) interpretAST(prog.next, prog)
-          else interpretAST(Oper("_"), prog)
-        }
-        Modifiers.monadicModifiers(mod)(astToFunc(at)) match {
-          case f: Nilad => f()(using ctx)
-          case f: Monad => f(getArg())(using ctx)
-          case f: Dyad  => f(getArg(), getArg())(using ctx)
-          case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
-        }
+        callFunc(Modifiers.monadicModifiers(mod)(astToFunc(at)), prog)
       case DyadicModified(at, at2, mod) =>
-        val getArg = { () =>
-          if (prog.hasNext) interpretAST(prog.next, prog)
-          else interpretAST(Oper("_"), prog)
-        }
-        Modifiers.dyadicModifiers(mod)(astToFunc(at), astToFunc(at2)) match {
-          case f: Nilad => f()(using ctx)
-          case f: Monad => f(getArg())(using ctx)
-          case f: Dyad  => f(getArg(), getArg())(using ctx)
-          case f: Triad => f(getArg(), getArg(), getArg())(using ctx)
-        }
+        callFunc(Modifiers.dyadicModifiers(mod)(astToFunc(at), astToFunc(at2)), prog)
+      case TriadicModified(at, at2, at3, mod) =>
+        callFunc(Modifiers.triadicModifiers(mod)(astToFunc(at), astToFunc(at2), astToFunc(at3)), prog)
+      case TetradicModified(at, at2, at3, at4, mod) =>
+        callFunc(Modifiers.tetradicModifiers(mod)(astToFunc(at), astToFunc(at2), astToFunc(at3), astToFunc(at4)), prog)
       case MapLam(asts) =>
         val l = (l: Any) =>
           (ctx: Ctx) ?=> {
@@ -82,7 +81,8 @@ object Interpreter {
           seq = seq :+ interpretAST(iter.next, iter)
         }
         seq
-      case n => n
+      case WhiteSpace() =>
+        throw InternalError("White space received in interpreter that should have been filtered out by the parser. This is a bug.")
     }
   }
 

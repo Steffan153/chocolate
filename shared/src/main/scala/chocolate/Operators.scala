@@ -139,11 +139,11 @@ object Operators {
   val head = addMonad("Ḣ") {
     case (a: Number) => ???
     case (a: String) => a.take(1)
-    case (a: CSeq) => a.head
+    case (a: CSeq)   => a.head
   }
-  val double = addMonad("Д") {
-    case (a: Number) => a * 2
-  }
+  val double = addMonad("Д")(vect1 { case (a: Number) =>
+    a * 2
+  })
   val prefixes = addMonad("P") {
     case (a: Number) =>
       var divisors = Seq[Number]()
@@ -162,20 +162,20 @@ object Operators {
     case (a: Number) => a.toChar.toString
     case (a: String) => if (a.length == 1) Number(a.head) else a.map(Number(_))
   })
-  val flat = addMonad("F") {
-    case (a: Seq[Any]) => a.flatMap {
+  val flat = addMonad("F") { case (a: Seq[Any]) =>
+    a.flatMap {
       case x: Seq[Any] => x
-      case x => Seq(x)
+      case x           => Seq(x)
     }
   }
-  val transliterate = addTriad("∂") {
-    case (b: String, c: String, a: String) => a.map { x => if (b contains x) c(b.indexOf(x)) else x }
+  val transliterate = addTriad("∂") { case (b: String, c: String, a: String) =>
+    a.map { x => if (b contains x) c(b.indexOf(x)) else x }
   }
   val sliceUntil: Dyad = addDyad(":") {
-    case (a: CSeq, b: Number)          => a.take(b.toInt)
-    case (a: String, b: Number)        => a.take(b.toInt)
-    case (a: Number, b: CSeq)          => b.take(a.toInt)
-    case (a: Number, b: String)        => b.take(a.toInt)
+    case (a: CSeq, b: Number)   => a.take(b.toInt)
+    case (a: String, b: Number) => a.take(b.toInt)
+    case (a: Number, b: CSeq)   => b.take(a.toInt)
+    case (a: Number, b: String) => b.take(a.toInt)
   }
   val suffixes = addMonad("#s") { case (a: String) =>
     a.scanRight("")(_ +: _).init
@@ -192,15 +192,45 @@ object Operators {
     }
     a
   }
-  val factorial = addMonad("!") { case (a: Number) =>
-    var p = Number.one
-    var i = Number.one
-    while (i <= a) {
-      p *= i
-      i += 1
-    }
-    p
+  val factorial: Any => Any = addMonad("Π") {
+    case (a: Number) =>
+      var p = Number.one
+      var i = Number.one
+      while (i <= a) {
+        p *= i
+        i += 1
+      }
+      p
+    case (a: String) => ???
+    case (a: Seq[Any]) =>
+      lazy val consistsOfNumbers: Any => Boolean = {
+        case (_: Number) => true
+        case (a: Seq[Any]) => a.forall(consistsOfNumbers(_))
+        case _ => false
+      }
+      if (consistsOfNumbers(a))
+        a.fold(Number.one)(multiply(_, _))
+      else
+        ???
   }
+  val sum: Any => Any = addMonad("∑") {
+    case (a: Number) => (a * (a + 1)).tquot(2)
+    case (a: String) => ???
+    case (a: Seq[Any]) =>
+      if (a.isEmpty) Number.zero else a.reduce(add(_, _))
+  }
+  val ior = addMonad("Ọ")(vect1 { case (a: Number) =>
+    spireRange(Number.one, a)
+  })
+  val eor = addMonad("Ȯ")(vect1 { case (a: Number) =>
+    spireRange(Number.one, a - 1)
+  })
+  val ezr = addMonad("Ż")(vect1 { case (a: Number) =>
+    spireRange(Number.zero, a - 1)
+  })
+  val izr = addMonad("Ẓ")(vect1 { case (a: Number) =>
+    spireRange(Number.zero, a)
+  })
   val interleave = addDyad("Ỵ") {
     case (a: String, b: String) =>
       val ai = a.iterator
@@ -214,13 +244,14 @@ object Operators {
     case (a: CSeq, b: CSeq) =>
       val ai = a.iterator
       val bi = b.iterator
-      LazyList.unfold((ai, bi)) {
-        (a, b) =>
+      LazyList
+        .unfold((ai, bi)) { (a, b) =>
           if (a.hasNext && !b.hasNext) Some((Seq(a.next), (a, b)))
           else if (!a.hasNext && b.hasNext) Some((Seq(b.next), (a, b)))
           else if (a.hasNext && b.hasNext) Some((Seq(a.next, b.next), (a, b)))
           else None
-      }.flatten
+        }
+        .flatten
   }
 
   addNilad("#i") { () =>
@@ -228,17 +259,23 @@ object Operators {
     a
   }
   addNilad("#I") { () =>
-    lazy val a: LazyList[Number] = Number.one #:: -Number.one #:: a.map { x => if (x < 0) x - 1 else x + 1 }
+    lazy val a: LazyList[Number] = Number.one #:: -Number.one #:: a.map { x =>
+      if (x < 0) x - 1 else x + 1
+    }
     Number.zero #:: a
   }
   addNilad("#Ḟ") { () =>
-    Number.zero #:: Number.one #:: LazyList.unfold((Number.zero, Number.one)) { s =>
-      val v = s._1 + s._2
-      Some((v, (s._2, v)))
+    Number.zero #:: Number.one #:: LazyList.unfold((Number.zero, Number.one)) {
+      s =>
+        val v = s._1 + s._2
+        Some((v, (s._2, v)))
     }
   }
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
-  addNilad("_") { () => (ctx: Ctx) ?=> if (ctx.contextVars.hasNext) ctx.contextVars.next() else ctx.inputCycle.next() }
+  addNilad("_") { () => (ctx: Ctx) ?=>
+    if (ctx.contextVars.hasNext) ctx.contextVars.next()
+    else ctx.inputCycle.next()
+  }
   addNilad("#_") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq }
   addNilad("#0") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq.head }
   addNilad("#1") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq(1) }
@@ -247,8 +284,12 @@ object Operators {
   addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
   addNilad("cZ") { () => "ZYXWVUTSRQPONMLKJIHGFEDCBA" }
   addNilad("cz") { () => "zyxwvutsrqponmlkjihgfedcba" }
-  addNilad("cb") { () => "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ" }
-  addNilad("cy") { () => "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA" }
+  addNilad("cb") { () =>
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  }
+  addNilad("cy") { () =>
+    "zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA"
+  }
   addNilad("cc") { () => "bcdfghjklmnpqrstvwxyz" }
   addNilad("cċ") { () => "bcdfghjklmnpqrstvwxz" }
   addNilad("cv") { () => "aeiou" }
