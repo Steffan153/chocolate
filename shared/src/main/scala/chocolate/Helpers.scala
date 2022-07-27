@@ -58,6 +58,24 @@ def spireRange(a: Number, b: Number): Seq[Number] = {
   LazyList.unfold(a) { s => if (s > b) None else Some((s, s + 1)) }
 }
 
+def boolToNum(a: Boolean) = if (a) Number.one else Number.zero
+
+def iterable(a: Any): Seq[Any] | String = {
+  a match {
+    case a: Number => spireRange(1, a)
+    case a: String => a
+    case a: Seq[Any] => a
+  }
+}
+
+def listIterable(a: Any): Seq[Any] = {
+  a match {
+    case a: Number => spireRange(1, a)
+    case a: String => a.map(_.toString)
+    case a: Seq[Any] => a
+  }
+}
+
 def astToFunc(at: AST): Func = {
   at match {
     case _: (NumberLiteral | StringLiteral | SeqBuild | Const) =>

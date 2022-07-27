@@ -69,4 +69,20 @@ object Modifiers {
 
   // Next two as a dyad.
   dyadicModifiers += "¥" -> { (l, r) => (a: Any, b: Any) => (ctx: Ctx) ?=> twoFuncs(l, r, LazyList(a, b)) }
+
+  // Each.
+  monadicModifiers += "€" -> {
+    case f: Nilad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).map(_ => f())
+    case f: Monad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).map(f(_))
+    case f: Dyad => (a: Any, b: Any) => (ctx: Ctx) ?=> (a, b) match {
+      case (a: CSeq, b: CSeq) => a.map(f(_, b))
+      case (a: CSeq, b: CAtom) => a.map(f(_, b))
+      case (a: CAtom, b: CSeq) => b.map(f(a, _))
+      case (a: String, b: String) => a.map(f(_, b))
+      case (a: String, b: Number) => a.map(f(_, b))
+      case (a: Number, b: String) => b.map(f(a, _))
+      case (a: Number, b: Number) => listIterable(a).map(f(_, b))
+    }
+    case f: Triad => ???
+  }
 }

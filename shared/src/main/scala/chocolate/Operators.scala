@@ -119,7 +119,15 @@ object Operators {
     case (a: String)   => a.reverse
     case (a: Number)   => ???
   }
-  val binomial = addDyad("B")(vect2 {
+  val remove: Dyad = addDyad("ṛ") {
+    case (a: Seq[Any], b: Any) => a.filter { x => strictEqual(x, b) == Number.zero }
+    case (a: String, b: String) => b.replace(a, "")
+    case (a: Number, b: String) => b.replace(a.toString(), "")
+    case (a: String, b: Number) => Number(b.toString.replace(a, ""))
+    case (a: Number, b: Number) => Number(b.toString.replace(a.toString, ""))
+    case (a: Any, b: Seq[Any]) => remove(b, a)
+  }
+  val binomial = addDyad("Ḅ")(vect2 {
     case (a: Number, b: Number) =>
       factorial(a).asInstanceOf[Number] / (factorial(b)
         .asInstanceOf[Number] * factorial(a - b).asInstanceOf[Number])
@@ -218,6 +226,49 @@ object Operators {
     case (a: String) => ???
     case (a: Seq[Any]) =>
       if (a.isEmpty) Number.zero else a.reduce(add(_, _))
+  }
+  val permutations = addMonad("ṗ") {
+    case (a: String) => a.permutations.toSeq
+    case (a: LazyList[Any]) => a.permutations.to(LazyList)
+    case (a: Seq[Any]) => a.permutations.toSeq
+    case (a: Number) => spireRange(1, a).permutations.toSeq
+  }
+  val powerset: Monad = addMonad("Ṗ") {
+    case (a: Number) => powerset(spireRange(1, a))
+    case (a: String) => a.foldLeft(Seq("")) { (accum, elem) => accum ++ accum.map { l => l :+ elem } }
+    case (a: Seq[Any]) =>
+      val iter = a.iterator
+      Seq.empty[Any] +: LazyList.unfold(Seq(Seq.empty[Any])) { prevSets =>
+        if (iter.hasNext) {
+          val next = iter.next
+          val newSets = prevSets.map { set => set :+ next }
+          Some(newSets, prevSets ++ newSets)
+        } else
+          None
+      }.flatten
+  }
+  val binary = addMonad("B")(vect1 {
+    case (a: Number) => a.toBigInt.toString(2)
+    case (a: String) => a.map(_.toChar.toInt.toBinaryString)
+  })
+  val equal = addDyad("=")(vect2 {
+    case (a: String, b: Number) => boolToNum(a == b.toString)
+    case (a: Number, b: String) => boolToNum(a.toString == b)
+    case (a, b) => boolToNum(a == b)
+  })
+  val strictEqual: Dyad = addDyad("Q") {
+    case (a: String, b: Number) => boolToNum(a == b.toString)
+    case (a: Number, b: String) => boolToNum(a.toString == b)
+    case (a: CSeq, b: CSeq) => boolToNum(a.zip(b).forall { (x, y) => strictEqual(x, y) == Number.one })
+    case (a, b) => boolToNum(a == b)
+  }
+  val contains = addDyad("ċ") {
+    case (a: String, b: String) => boolToNum(a contains b)
+    case (a: String, b: Number) => boolToNum(a contains b.toString)
+    case (a: Number, b: String) => boolToNum(a.toString contains b)
+    case (a: Number, b: Number) => boolToNum(a.toString contains b.toString)
+    case (a: Seq[Any], b: Any) => boolToNum(a contains b)
+    case (a: Any, b: Seq[Any]) => boolToNum(b contains a)
   }
   val ior = addMonad("Ọ")(vect1 { case (a: Number) =>
     spireRange(Number.one, a)
