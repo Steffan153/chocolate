@@ -268,7 +268,7 @@ object Operators {
     case (a: Number, b: String) => boolToNum(a.toString contains b)
     case (a: Number, b: Number) => boolToNum(a.toString contains b.toString)
     case (a: Seq[Any], b: Any) => boolToNum(a.exists(x => strictEqual(x, b) == 1))
-    case (a: Any, b: Seq[Any]) => boolToNum(b contains a)
+    case (a: Any, b: Seq[Any]) => boolToNum(b.exists(x => strictEqual(x, a) == 1))
   }
   val ior = addMonad("Ọ")(vect1 { case (a: Number) =>
     spireRange(Number.one, a)
