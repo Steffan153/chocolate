@@ -123,8 +123,12 @@ object Operators {
     case (a: Seq[Any], b: Any) => a.filter { x => strictEqual(x, b) == Number.zero }
     case (a: String, b: String) => b.replace(a, "")
     case (a: Number, b: String) => b.replace(a.toString(), "")
-    case (a: String, b: Number) => Number(b.toString.replace(a, ""))
-    case (a: Number, b: Number) => Number(b.toString.replace(a.toString, ""))
+    case (a: String, b: Number) =>
+      val x = b.toString.replace(a, "")
+      if (x == "") Number.zero else Number(x)
+    case (a: Number, b: Number) =>
+      val x = b.toString.replace(a.toString, "")
+      if (x == "") Number.zero else Number(x)
     case (a: Any, b: Seq[Any]) => remove(b, a)
   }
   val binomial = addDyad("Ḅ")(vect2 {
