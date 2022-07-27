@@ -182,37 +182,50 @@
           codeEditor.getValue().replace(/\r\n/g, "\n"),
           inputEditor.getValue().replace(/\r\n/g, "\n").split("\n").filter(Boolean)
         ).slice(-1)[0];
-        const stringify = (x) =>
-          Array.isArray(x)
-            ? "[" + x.map(stringify).join(", ") + "]"
-            : typeof x === "string"
-            ? '"' +
-              x.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') +
-              '"'
-            : x.toString();
-        if (out.next) {
-          $(".output").innerText += "[";
-          let next, tooMany;
-          let i = 0;
-          while (true) {
-            if (i === 100) {
-              tooMany = true;
-              break;
+        function output(out) {
+          if (out.next) {
+            $(".output").innerText += "[";
+            let next, tooMany;
+            let i = 0;
+            while (true) {
+              if (i === 100) {
+                tooMany = true;
+                break;
+              }
+              next = out.next();
+              if (next.done) {
+                break;
+              }
+              if (i) $(".output").innerText += ", ";
+              output(next.value);
+              i++;
             }
-            next = out.next();
-            if (next.done) {
-              break;
+            $(".output").innerText += "]";
+            if (tooMany) {
+              $(".too-many").innerText = "(long list was truncated to 100 items)";
             }
-            $(".output").innerText += (i !== 0 ? ", " : "") + stringify(next.value);
-            i++;
+          } else if (Array.isArray(out)) {
+            $('.output').innerText += "[";
+            let i = 0, tooMany = false;
+            for (const item of out) {
+              if (i === 100) {
+                tooMany = true;
+                break;
+              }
+              if (i++) $(".output").innerText += ", ";
+              output(item);
+            }
+            $(".output").innerText += "]";
+            if (tooMany) {
+              $(".too-many").innerText = "(long list was truncated to 100 items)";
+            }
+          } else if (typeof out === 'string') {
+            $('.output').innerText += '"' + out.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"';
+          } else {
+            $('.output').innerText += out.toString();
           }
-          $(".output").innerText += "]";
-          if (tooMany) {
-            $(".too-many").innerText = "(truncated to 100 items)";
-          }
-          return;
         }
-        $(".output").innerText = stringify(out);
+        output(out);
       });
       const encode = x => btoa(unescape(encodeURIComponent(x.replace(/\r\n/g, "\n"))));
       const decode = x => decodeURIComponent(escape(atob(x)));
@@ -224,31 +237,16 @@
         $(".output").innerText =
           location.protocol + "//" + location.host + "/" + location.hash;
       });
-      function selectElementText(el) {
-        var doc = document,
-          sel,
-          range;
-        if (window.getSelection && doc.createRange) {
-          sel = window.getSelection();
-          range = doc.createRange();
-          range.selectNodeContents(el);
-          sel.removeAllRanges();
-          sel.addRange(range);
-        } else if (doc.body.createTextRange) {
-          range = doc.body.createTextRange();
-          range.moveToElementText(el);
-          range.select();
-        }
-      }
       $(".cgcc").addEventListener("click", () => {
+        const l = codeEditor.getValue().replace(/\r\n/g, "\n").length;
         $(".gen").click();
         $(".copy").style.display = "";
         $(".too-many").innerText = "";
         $(
           ".output"
         ).innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${
-          codeEditor.getValue().replace(/\r\n/g, "\n").length
-        } bytes
+          l
+        } byte${l === 1 ? '' : 's'}
 
 \`\`\`
 ${codeEditor.getValue().replace(/\r\n/g, "\n")}
@@ -257,8 +255,7 @@ ${codeEditor.getValue().replace(/\r\n/g, "\n")}
 [Try it online!](${$(".output").innerText})`;
       });
       $(".copy").addEventListener("click", () => {
-        selectElementText($(".output"));
-        document.execCommand("copy");
+        navigator.clipboard.writeText($(".output").innerText);
       });
     </script>
   </body>

@@ -75,7 +75,12 @@ object Operators {
     case (a: Number, b: String) => a.toString + b
     case (a: String, b: String) => a + b
   })
-  val subtract = addDyad("-")(vect2 { case (a: Number, b: Number) => a - b })
+  val subtract = addDyad("-")(vect2 {
+    case (a: Number, b: Number) => a - b
+    case (a: String, b: Number) => ???
+    case (a: Number, b: String) => ???
+    case (a: String, b: String) => a.replace(b, "")
+  })
   val multiply = addDyad("*")(vect2 {
     case (a: Number, b: Number) => a * b
     case (a: String, b: Number) => a * b.toInt
@@ -91,9 +96,9 @@ object Operators {
   })
   val divide = addDyad("/")(vect2 {
     case (a: Number, b: Number) => a / b
-    case (a: String, b: Number) => chop(a, b)
-    case (a: Number, b: String) => chop(b, a)
-    case (a: String, b: String) => a.split(b).toSeq
+    case (a: String, b: Number) => ???
+    case (a: Number, b: String) => ???
+    case (a: String, b: String) => ???
   })
   val modulus = addDyad("%")(vect2 {
     case (a: Number, b: Number) => a tmod b
@@ -101,23 +106,23 @@ object Operators {
     case (a: Number, b: String) => ???
     case (a: String, b: String) => ???
   })
-  val exponent: Dyad = addDyad("e")(vect2 { case (a: Number, b: Number) =>
-    a ** b
+  val exponent: Dyad = addDyad("e")(vect2 {
+    case (a: Number, b: Number) => a ** b
   })
   val negate = addMonad("N")(vect1 {
     case (a: Number) => -a
-    case (a: String) => a.map { x => if (x.isUpper) x.toLower else x.toUpper }
+    case (a: String) => a.toLowerCase()
   })
   val pair = addDyad(";") { (a, b) => Seq(a, b) }
   val dropOne = addMonad("D") {
     case (a: Seq[Any]) => a.drop(1)
     case (a: String)   => a.drop(1)
-    case (a: Number)   => ???
+    case (a: Number)   => a - 2
   }
   val reverse = addMonad("⅃") {
     case (a: Seq[Any]) => a.reverse
     case (a: String)   => a.reverse
-    case (a: Number)   => ???
+    case (a: Number)   => Number(a.toString().reverse)
   }
   val remove: Dyad = addDyad("ṛ") {
     case (a: Seq[Any], b: Any) => a.filter { x => strictEqual(x, b) == Number.zero }
@@ -131,7 +136,7 @@ object Operators {
       if (x == "") Number.zero else Number(x)
     case (a: Any, b: Seq[Any]) => remove(b, a)
   }
-  val binomial = addDyad("Ḅ")(vect2 {
+  val binomial = addDyad("Ċ")(vect2 {
     case (a: Number, b: Number) =>
       factorial(a).asInstanceOf[Number] / (factorial(b)
         .asInstanceOf[Number] * factorial(a - b).asInstanceOf[Number])
@@ -153,8 +158,9 @@ object Operators {
     case (a: String) => a.take(1)
     case (a: CSeq)   => a.head
   }
-  val double = addMonad("Д")(vect1 { case (a: Number) =>
-    a * 2
+  val double = addMonad("Д")(vect1 {
+    case (a: Number) => a * 2
+    case (a: String) => a.repeat(2)
   })
   val prefixes = addMonad("P") {
     case (a: Number) =>
@@ -188,42 +194,6 @@ object Operators {
     case (a: String, b: Number) => a.take(b.toInt)
     case (a: Number, b: CSeq)   => b.take(a.toInt)
     case (a: Number, b: String) => b.take(a.toInt)
-  }
-  val suffixes = addMonad("#s") { case (a: String) =>
-    a.scanRight("")(_ +: _).init
-  }
-  val fibonacci = addMonad("#f") { case (n: Number) =>
-    var a = Number.zero
-    var b = Number.one
-    var i = Number.zero
-    while (i < n) {
-      val temp = a
-      a = b
-      b = temp + b
-      i += 1
-    }
-    a
-  }
-  val factorial: Any => Any = addMonad("Π") {
-    case (a: Number) =>
-      var p = Number.one
-      var i = Number.one
-      while (i <= a) {
-        p *= i
-        i += 1
-      }
-      p
-    case (a: String) => ???
-    case (a: Seq[Any]) =>
-      lazy val consistsOfNumbers: Any => Boolean = {
-        case (_: Number) => true
-        case (a: Seq[Any]) => a.forall(consistsOfNumbers(_))
-        case _ => false
-      }
-      if (consistsOfNumbers(a))
-        a.fold(Number.one)(multiply(_, _))
-      else
-        ???
   }
   val sum: Any => Any = addMonad("∑") {
     case (a: Number) => (a * (a + 1)).tquot(2)
@@ -309,6 +279,43 @@ object Operators {
         .flatten
   }
 
+  val suffixes = addMonad("#s") { case (a: String) =>
+    a.scanRight("")(_ +: _).init
+  }
+  val fibonacci = addMonad("#f") { case (n: Number) =>
+    var a = Number.zero
+    var b = Number.one
+    var i = Number.zero
+    while (i < n) {
+      val temp = a
+      a = b
+      b = temp + b
+      i += 1
+    }
+    a
+  }
+  val factorial: Any => Any = addMonad("Π") {
+    case (a: Number) =>
+      var p = Number.one
+      var i = Number.one
+      while (i <= a) {
+        p *= i
+        i += 1
+      }
+      p
+    case (a: String) => ???
+    case (a: Seq[Any]) =>
+      lazy val consistsOfNumbers: Any => Boolean = {
+        case (_: Number) => true
+        case (a: Seq[Any]) => a.forall(consistsOfNumbers(_))
+        case _ => false
+      }
+      if (consistsOfNumbers(a))
+        a.fold(Number.one)(multiply(_, _))
+      else
+        ???
+  }
+
   addNilad("#i") { () =>
     lazy val a: LazyList[Number] = Number.one #:: a.map(_ + 1)
     a
@@ -331,9 +338,6 @@ object Operators {
     if (ctx.contextVars.hasNext) ctx.contextVars.next()
     else ctx.inputCycle.next()
   }
-  addNilad("#_") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq }
-  addNilad("#0") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq.head }
-  addNilad("#1") { () => (ctx: Ctx) ?=> ctx.contextVarsSeq(1) }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
   addNilad("ca") { () => "abcdefghijklmnopqrstuvwxyz" }
   addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
