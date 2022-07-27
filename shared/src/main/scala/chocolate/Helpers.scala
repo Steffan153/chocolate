@@ -29,7 +29,7 @@ def chocPrint(s: Any) = {
     case (s: Seq[Any], _, _) =>
       "[" + s.map(res(_, true, true)).mkString(", ") + "]"
   }
-  res(s, true, false) match {
+  res(s, false, false) match {
     case (x: (() => Any)) => x()
     case x                => println(x)
   }

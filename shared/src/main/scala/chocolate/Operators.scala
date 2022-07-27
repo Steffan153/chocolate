@@ -12,7 +12,7 @@ type Triad = (Any, Any, Any) => Ctx ?=> Any
 type Func = Nilad | Monad | Dyad | Triad
 
 type CSeq = Seq[Any]
-type CAtom = String | Number | Func
+type CAtom = String | Number
 
 object Operators {
   val elements = mut.Map[String, Operator]()
@@ -277,6 +277,17 @@ object Operators {
           else None
         }
         .flatten
+  }
+
+  val joinByNewlines = addMonad("ṇ") {
+    case (a: Seq[Seq[Any]]) => a.map(x => x.mkString(" ")).mkString("\n")
+    case (a: Seq[Any]) => a.mkString("\n")
+  }
+
+  val gridify = addMonad("#G") {
+    case (a: Seq[Seq[Any]]) =>
+      val width = a.flatMap(x => x.map(x => x.toString().length)).max
+      a.map(x => x.map(y => y.toString().padTo(width, ' ')).mkString(" ")).mkString("\n")
   }
 
   val suffixes = addMonad("#s") { case (a: String) =>

@@ -182,7 +182,7 @@
           codeEditor.getValue().replace(/\r\n/g, "\n"),
           inputEditor.getValue().replace(/\r\n/g, "\n").split("\n").filter(Boolean)
         ).slice(-1)[0];
-        function output(out) {
+        function output(out, quotify = true) {
           if (out.next) {
             $(".output").innerText += "[";
             let next, tooMany;
@@ -220,12 +220,15 @@
               $(".too-many").innerText = "(long list was truncated to 100 items)";
             }
           } else if (typeof out === 'string') {
-            $('.output').innerText += '"' + out.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"';
+            if (quotify)
+              $('.output').innerText += '"' + out.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"';
+            else
+              $('.output').innerText += out;
           } else {
             $('.output').innerText += out.toString();
           }
         }
-        output(out);
+        output(out, false);
       });
       const encode = x => btoa(unescape(encodeURIComponent(x.replace(/\r\n/g, "\n"))));
       const decode = x => decodeURIComponent(escape(atob(x)));
