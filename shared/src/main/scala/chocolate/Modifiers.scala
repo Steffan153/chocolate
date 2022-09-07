@@ -6,6 +6,7 @@ import spire.math.Number
 
 object Modifiers {
   val monadicModifiers: mut.Map[String, Func => Func] = mut.Map.empty
+  val monadicGreedModifiers: mut.Map[String, (Func, Option[Nilad]) => Func] = mut.Map.empty
   val dyadicModifiers: mut.Map[String, (Func, Func) => Func] = mut.Map.empty
   val triadicModifiers: mut.Map[String, (Func, Func, Func) => Func] =
     mut.Map.empty
@@ -14,7 +15,7 @@ object Modifiers {
 
   monadicModifiers += "∇" -> {
     case a: Nilad => ???
-    case a: Monad => ??? // Min-by.
+    case f: Monad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).sortWith((x, y) => lessThan(f(x), f(y))).head // Min-by.
     case a: Dyad  => (x: Any, y: Any) => (ctx: Ctx) ?=> a(y, x)(using ctx)
     case a: Triad => ???
   }
@@ -105,23 +106,14 @@ object Modifiers {
     case f: Nilad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).map(_ => f())
     case f: Monad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).map(f(_))
     case f: Dyad =>
-      (a: Any, b: Any) =>
-        (ctx: Ctx) ?=>
-          (a, b) match {
-            case (a: CSeq, b: CSeq)     => a.map(f(_, b))
-            case (a: CSeq, b: CAtom)    => a.map(f(_, b))
-            case (a: CAtom, b: CSeq)    => b.map(f(a, _))
-            case (a: String, b: String) => a.map(f(_, b))
-            case (a: String, b: Number) => a.map(f(_, b))
-            case (a: Number, b: Any) => listIterable(a).map(f(_, b))
-          }
+      (a: Any, b: Any) => (ctx: Ctx) ?=> listIterable(a).map(f(_, b))
     case f: Triad => ???
   }
 
   // Right-each.
   monadicModifiers += "δ" -> {
     case f: Nilad => ???
-    case f: Monad => ??? // Max-by.
+    case f: Monad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).sortWith((x, y) => lessThan(f(x), f(y))).last // Max-by.
     case f: Dyad =>
       (a: Any, b: Any) => (ctx: Ctx) ?=> listIterable(b).map(f(a, _))
     case f: Triad => ???
@@ -130,8 +122,28 @@ object Modifiers {
   // Dyad-to-monad.
   monadicModifiers += "ß" -> {
     case f: Nilad => ???
-    case f: Monad => ??? // Sort-by.
+    case f: Monad => (a: Any) => (ctx: Ctx) ?=> listIterable(a).sortWith((x, y) => lessThan(f(x), f(y))) // Sort-by.
     case f: Dyad => (a: Any) => (ctx: Ctx) ?=> f(a, a)
     case f: Triad => (a: Any) => (ctx: Ctx) ?=> f(a, a, a)
+  }
+
+  monadicGreedModifiers += "/" -> {
+    case (f: Dyad, None) =>
+      (i: Any) => (ctx: Ctx) ?=>
+        val a = listIterable(i)
+        if (a.isEmpty) 0
+        else a.reduce((x, y) => f(x, y))
+    case (f: Dyad, Some(nilad)) => (i: Any) => (ctx: Ctx) ?=>
+      val num = nilad().asInstanceOf[Number].toInt
+      listIterable(i).grouped(num).map(a => a.reduce((x, y) => f(x, y))).toSeq
+  }
+
+  monadicGreedModifiers += "ω" -> {
+    case (f: Dyad, None) =>
+      (i: Any) => (ctx: Ctx) ?=>
+        overlapping(listIterable(i), 2).map(a => f(a.head, a.last))
+    case (f: Dyad, Some(nilad)) => (i: Any) => (ctx: Ctx) ?=>
+      val num = nilad().asInstanceOf[Number]
+      overlapping(listIterable(i), num).map(a => a.reduce((x, y) => f(x, y)))
   }
 }

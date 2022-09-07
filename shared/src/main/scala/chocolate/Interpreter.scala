@@ -43,6 +43,8 @@ object Interpreter {
           else interpretAST(Oper("_"), prog)
         }
         fn(args)(using ctx)
+      case MonadicGreedModified(at, nil, mod) =>
+        callFunc(Modifiers.monadicGreedModifiers(mod)(astToFunc(at), nil.map(astToFunc(_).asInstanceOf[Nilad])), prog)
       case MonadicModified(at, mod) =>
         callFunc(Modifiers.monadicModifiers(mod)(astToFunc(at)), prog)
       case DyadicModified(at, at2, mod) =>

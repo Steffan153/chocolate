@@ -104,3 +104,28 @@ def astToFunc(at: AST): Func = {
       }
   }
 }
+
+def lessThan(a: Any, b: Any): Boolean = (a, b) match {
+  case (a: Number, b: Number) => a < b
+  case (_, _) => a.toString < b.toString
+}
+
+def overlapping(a: Seq[Any], b: Number) = {
+  LazyList.unfold(a) { v =>
+    val a = v.take(b.toInt)
+    if (a.length < b.toInt) None
+    else Some((a, v.tail))
+  }
+}
+
+def isPrime(a: Number): Boolean = {
+  var i = 2
+  val u = a / 2
+  while (i <= u) {
+    if (a.tmod(i) == 0) {
+      return false
+    }
+    i += 1
+  }
+  true
+}

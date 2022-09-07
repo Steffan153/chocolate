@@ -14,7 +14,7 @@
     <style>
       .output {
         white-space: pre-wrap;
-        font-family: "DejaVu Sans Mono";
+        font-family: monospace;
         margin-top: 15px;
         font-size: 0.9rem;
       }
@@ -26,6 +26,8 @@
         display: flex;
         justify-content: center;
         margin: 0;
+        background-color: rgb(46, 46, 46);
+        color: white;
       }
       .container {
         width: calc(min(95vw, 600px));
@@ -45,19 +47,6 @@
       button:not(.run):not(.gen):not(.cgcc):hover {
         background-color: #0f65bb;
       }
-      textarea {
-        font-family: "DejaVu Sans Mono";
-        border: 1px solid #cbcbcb;
-        border-radius: 8px;
-        width: 100% !important;
-        outline: none !important;
-        padding: 10px;
-        transition: box-shadow 0.3s;
-        margin-top: 5px;
-      }
-      textarea:focus {
-        box-shadow: 1px 1px 6px rgba(0, 0, 0, 0.5);
-      }
 
       label[for="inputs"] {
         margin-top: 15px;
@@ -72,14 +61,16 @@
       #inputs {
         width: 100%;
         height: 300px;
-        border: 1px solid #ccc;
+        border: 1px solid #555;
         margin-top: 5px;
       }
 
       #inputs {
         height: 150px;
       }
-      .run, .gen, .cgcc {
+      .run,
+      .gen,
+      .cgcc {
         background: none;
         border: none;
         outline: none !important;
@@ -87,11 +78,11 @@
       }
       svg {
         width: 25px;
-        fill: #000000;
-        transition: fill .2s;
+        fill: white;
+        transition: fill 0.2s;
       }
       .btns button:hover svg {
-        fill: rgb(0, 119, 238);
+        fill: rgb(34, 145, 255);
       }
 
       .btns {
@@ -106,7 +97,12 @@
     <div class="container">
       <p class="btns">
         <button title="Run" class="run">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. --><path d="M361 215C375.3 223.8 384 239.3 384 256C384 272.7 375.3 288.2 361 296.1L73.03 472.1C58.21 482 39.66 482.4 24.52 473.9C9.377 465.4 0 449.4 0 432V80C0 62.64 9.377 46.63 24.52 38.13C39.66 29.64 58.21 29.99 73.03 39.04L361 215z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <!--! Font Awesome Pro 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
+            <path
+              d="M361 215C375.3 223.8 384 239.3 384 256C384 272.7 375.3 288.2 361 296.1L73.03 472.1C58.21 482 39.66 482.4 24.52 473.9C9.377 465.4 0 449.4 0 432V80C0 62.64 9.377 46.63 24.52 38.13C39.66 29.64 58.21 29.99 73.03 39.04L361 215z"
+            />
+          </svg>
         </button>
         <button title="Generate Link" class="gen">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
@@ -125,7 +121,9 @@
           </svg>
         </button>
       </p>
-      <div><label for="code">Code: <span class="bytecount">0</span> bytes</label></div>
+      <div>
+        <label for="code">Code: <span class="bytecount">0 bytes</span></label>
+      </div>
       <div id="code"></div>
       <div><label for="inputs">Inputs:</label></div>
       <div id="inputs"></div>
@@ -149,6 +147,7 @@
             enabled: false,
           },
           folding: false,
+          theme: "vs-dark",
         });
         inputEditor = monaco.editor.create(document.querySelector("#inputs"), {
           language: "plaintext",
@@ -157,9 +156,11 @@
             enabled: false,
           },
           folding: false,
+          theme: "vs-dark",
         });
         codeEditor.onDidChangeModelContent(() => {
-          $('.bytecount').innerText = codeEditor.getValue().replace(/\r\n/g, "\n").length;
+          const l = codeEditor.getValue().replace(/\r\n/g, "\n").length;
+          $(".bytecount").innerText = l + " byte" + (l === 1 ? "" : "s");
         });
         if (location.hash) {
           try {
@@ -178,65 +179,78 @@
         $(".output").innerText = "";
         $(".too-many").innerText = "";
         $(".copy").style.display = "";
-        const out = Chocolate.execute(
-          codeEditor.getValue().replace(/\r\n/g, "\n"),
-          inputEditor.getValue().replace(/\r\n/g, "\n").split("\n").filter(Boolean)
-        ).slice(-1)[0];
-        function output(out, quotify = true) {
-          if (out.next) {
-            $(".output").innerText += "[";
-            let next, tooMany;
-            let i = 0;
-            while (true) {
-              if (i === 100) {
-                tooMany = true;
-                break;
+        try {
+          const out = Chocolate.execute(
+            codeEditor.getValue().replace(/\r\n/g, "\n"),
+            inputEditor.getValue().replace(/\r\n/g, "\n").split("\n").filter(Boolean)
+          ).slice(-1)[0];
+          function output(out, quotify = true) {
+            if (out.next) {
+              $(".output").innerText += "[";
+              let next, tooMany;
+              let i = 0;
+              while (true) {
+                if (i === 100) {
+                  tooMany = true;
+                  break;
+                }
+                next = out.next();
+                if (next.done) {
+                  break;
+                }
+                if (i) $(".output").innerText += ", ";
+                output(next.value);
+                i++;
               }
-              next = out.next();
-              if (next.done) {
-                break;
+              $(".output").innerText += "]";
+              if (tooMany) {
+                $(".too-many").innerText = "(long list was truncated to 100 items)";
               }
-              if (i) $(".output").innerText += ", ";
-              output(next.value);
-              i++;
-            }
-            $(".output").innerText += "]";
-            if (tooMany) {
-              $(".too-many").innerText = "(long list was truncated to 100 items)";
-            }
-          } else if (Array.isArray(out)) {
-            $('.output').innerText += "[";
-            let i = 0, tooMany = false;
-            for (const item of out) {
-              if (i === 100) {
-                tooMany = true;
-                break;
+            } else if (Array.isArray(out)) {
+              $(".output").innerText += "[";
+              let i = 0,
+                tooMany = false;
+              for (const item of out) {
+                if (i === 100) {
+                  tooMany = true;
+                  break;
+                }
+                if (i++) $(".output").innerText += ", ";
+                output(item);
               }
-              if (i++) $(".output").innerText += ", ";
-              output(item);
+              $(".output").innerText += "]";
+              if (tooMany) {
+                $(".too-many").innerText = "(long list was truncated to 100 items)";
+              }
+            } else if (typeof out === "string") {
+              if (quotify)
+                $(".output").innerText +=
+                  '"' +
+                  out.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') +
+                  '"';
+              else $(".output").innerText += out;
+            } else {
+              $(".output").innerText += out.toString();
             }
-            $(".output").innerText += "]";
-            if (tooMany) {
-              $(".too-many").innerText = "(long list was truncated to 100 items)";
-            }
-          } else if (typeof out === 'string') {
-            if (quotify)
-              $('.output').innerText += '"' + out.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/"/g, '\\"') + '"';
-            else
-              $('.output').innerText += out;
-          } else {
-            $('.output').innerText += out.toString();
           }
+          output(out, false);
+        } catch (e) {
+          $(".output").innerText = e;
         }
-        output(out, false);
       });
-      const encode = x => btoa(unescape(encodeURIComponent(x.replace(/\r\n/g, "\n"))));
-      const decode = x => decodeURIComponent(escape(atob(x)));
+      const encode = (x) => btoa(unescape(encodeURIComponent(x.replace(/\r\n/g, "\n"))));
+      const decode = (x) => decodeURIComponent(escape(atob(x)));
       $(".gen").addEventListener("click", () => {
         $(".copy").style.display = "";
         $(".too-many").innerText = "";
         location.hash =
-          "#" + encode(JSON.stringify([codeEditor.getValue(), inputEditor.getValue()]));
+          "#" +
+          encode(
+            JSON.stringify([
+              codeEditor.getValue().replace(/\r\n/g, "\n"),
+              inputEditor.getValue().replace(/\r\n/g, "\n"),
+            ])
+          );
         $(".output").innerText =
           location.protocol + "//" + location.host + "/" + location.hash;
       });
@@ -247,9 +261,9 @@
         $(".too-many").innerText = "";
         $(
           ".output"
-        ).innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${
-          l
-        } byte${l === 1 ? '' : 's'}
+        ).innerText = `# [Chocolate](https://github.com/Steffan153/chocolate), ${l} byte${
+          l === 1 ? "" : "s"
+        }
 
 \`\`\`
 ${codeEditor.getValue().replace(/\r\n/g, "\n")}

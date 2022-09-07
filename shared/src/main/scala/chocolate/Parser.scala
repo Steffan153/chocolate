@@ -16,6 +16,16 @@ class Parser(private val prog: Iterator[Char]) {
   private def next() =
     if (buf.isEmpty) prog.next else buf.remove(0)
 
+  private def isNilad(ast: AST) = {
+    ast match {
+      case StringLiteral(_) => true
+      case NumberLiteral(_) => true
+      case Const(_) => true
+      case Oper(x) => Operators.getOperator(x).arity == 0
+      case _ => false
+    }
+  }
+
   private def parseAST(): AST =
     next() match
       case x if x.isWhitespace => WhiteSpace()
@@ -122,6 +132,14 @@ class Parser(private val prog: Iterator[Char]) {
         while (peek.isWhitespace)
           next()
         MonadicModified(parseAST(), x.toString)
+      case x if Modifiers.monadicGreedModifiers.contains(x.toString) =>
+        while (peek.isWhitespace)
+          next()
+        val ast1 = parseAST()
+        if (isNilad(ast1))
+          MonadicGreedModified(parseAST(), Some(ast1), x.toString)
+        else
+          MonadicGreedModified(ast1, None, x.toString)
       case x =>
         Oper(x.toString)
 

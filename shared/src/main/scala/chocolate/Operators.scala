@@ -81,7 +81,7 @@ object Operators {
     case (a: Number, b: String) => ???
     case (a: String, b: String) => a.replace(b, "")
   })
-  val multiply = addDyad("*")(vect2 {
+  val multiply = addDyad("×")(vect2 {
     case (a: Number, b: Number) => a * b
     case (a: String, b: Number) => a * b.toInt
     case (a: Number, b: String) => b * a.toInt
@@ -94,7 +94,7 @@ object Operators {
         val most = common.toSeq.maxBy(_.length)
         a.dropRight(most.length) + most + b.drop(most.length)
   })
-  val divide = addDyad("/")(vect2 {
+  val divide = addDyad("÷")(vect2 {
     case (a: Number, b: Number) => a / b
     case (a: String, b: Number) => ???
     case (a: Number, b: String) => ???
@@ -256,6 +256,9 @@ object Operators {
   val izr = addMonad("Ẓ")(vect1 { case (a: Number) =>
     spireRange(Number.zero, a)
   })
+  val ol = addDyad("ȯ") {
+    case (a: Seq[Any], b: Number) => overlapping(a, b)
+  }
   val interleave = addDyad("Ỵ") {
     case (a: String, b: String) =>
       val ai = a.iterator
@@ -293,7 +296,7 @@ object Operators {
   val suffixes = addMonad("#s") { case (a: String) =>
     a.scanRight("")(_ +: _).init
   }
-  val fibonacci = addMonad("#f") { case (n: Number) =>
+  val fibonacci = addMonad("#f")(vect1 { case (n: Number) =>
     var a = Number.zero
     var b = Number.one
     var i = Number.zero
@@ -304,7 +307,7 @@ object Operators {
       i += 1
     }
     a
-  }
+  })
   val factorial: Any => Any = addMonad("Π") {
     case (a: Number) =>
       var p = Number.one
@@ -344,12 +347,20 @@ object Operators {
         Some((v, (s._2, v)))
     }
   }
+  addNilad("#P") { () =>
+    lazy val a: Number => LazyList[Number] = n => if (isPrime(n)) n #:: a(n + 2) else a(n + 2)
+    Number(2) #:: a(Number(3))
+  }
   addNilad("?") { () => (ctx: Ctx) ?=> ctx.inputCycle.next() }
   addNilad("_") { () => (ctx: Ctx) ?=>
     if (ctx.contextVars.hasNext) ctx.contextVars.next()
     else ctx.inputCycle.next()
   }
+  addNilad("c0") { () => Seq(Number.zero, Number.zero) }
+  addNilad("c⁰") { () => Seq(Number.zero, Number.one) }
   addNilad("c1") { () => Seq(Number.one, Number.one) }
+  addNilad("c-") { () => Seq(-Number.one, Number.one) }
+  addNilad("c+") { () => Seq(Number.one, -Number.one) }
   addNilad("ca") { () => "abcdefghijklmnopqrstuvwxyz" }
   addNilad("cA") { () => "ABCDEFGHIJKLMNOPQRSTUVWXYZ" }
   addNilad("cZ") { () => "ZYXWVUTSRQPONMLKJIHGFEDCBA" }
